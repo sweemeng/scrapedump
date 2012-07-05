@@ -18,11 +18,14 @@ class Event(object):
         self.from_dict(data)
 
     def to_json(self):
+        temp = self.to_dict()
+        return json.dumps(temp)
+
+    def to_dict(self):
         temp = {}
         temp['action'] = self.action
         temp['data'] = self.data
         temp['param'] = self.param
         now = datetime.datetime.now()
         temp['_timestamp'] = now.isoformat()
-
-        return json.dumps(temp)
+        return temp
