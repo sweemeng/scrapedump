@@ -32,6 +32,19 @@ def test_create_from_dict():
     assert event.data['a'] == 1
     assert event.param['b'] == 2
 
+def test_create_from_json():
+    event =  Event()
+    test_dict = {
+            'action':'create',
+            'data':{'a':1},
+            'param':{'b':2}
+            }
+    event.from_json(json.dumps(test_dict))
+
+    assert event.action == 'create'
+    assert event.data['a'] == 1
+    assert event.param['b'] == 2
+
 
 
 
