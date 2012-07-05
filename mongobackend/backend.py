@@ -15,7 +15,7 @@ class MongoModel(object):
         return self.entries.find(param)
 
     def insert(self,data):
-        data['_date'] = dateparser.parse(data['date'])
+        data['_timestamp'] = dateparser.parse(data['_timestamp'])
         self.entries.insert(data)
 
     def update(self,param,data):
