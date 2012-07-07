@@ -1,18 +1,16 @@
 import pymongo
-import dateutil.parser as dateparser
 
 
 class MongoModel(object):
-    def __init__(self):
+    def __init__(self,project):
         self.conn = pymongo.Connection()
         self.db = self.conn.db
-        self.entries = self.db.entries
+        self.entries = self.db[project]
 
     def query(self,param):
         return self.entries.find(param)
 
     def insert(self,data):
-        data['_timestamp'] = dateparser.parse(data['_timestamp'])
         self.entries.insert(data)
 
     def update(self,param,data):
