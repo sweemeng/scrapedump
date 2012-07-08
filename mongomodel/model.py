@@ -2,22 +2,36 @@ import pymongo
 
 
 class MongoModel(object):
-    def __init__(self,project):
+    # The big idea is to make data more json friendly
+    # the exception is the json utils, 
+    def __init__(self,project='scraped',collection='default'):
         self.conn = pymongo.Connection()
-        self.db = self.conn.db
-        self.entries = self.db[project]
+        self.db = self.conn[project]
+        self.entries = self.db[collection]
 
-    def query(self,param):
-        return self.entries.find(param)
+    def query(self,param,fetch_all=False):
+        if fetch_all:
+            result = []
+            temp = self.entries.find(param)
+            for t in temp:
+                result.append(t)
+        else:
+            result = self.entries.find_one(param)
+        return result
 
     def insert(self,data):
         self.entries.insert(data)
 
     def update(self,param,data):
-        self.entries.update(param,data)
+        self.entries.update(param,{'$set':data})
 
     def delete(self,param):
         self.entries.remove(param)
 
-
+    def all(self):
+        data= self.entries.find()
+        result = []
+        for d in data:
+            result.append(d)
+        return result
 
