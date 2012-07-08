@@ -11,7 +11,7 @@ app.add_url_rule('/api/',defaults={'entry_id':None},
         view_func=api_views,methods=['GET',])
 app.add_url_rule('/api/',view_func=api_views,methods=['POST',])
 app.add_url_rule('/api/<entry_id>/',
-        view_func=api_views,methods=['GET','PUT',])
+        view_func=api_views,methods=['GET','PUT','DELETE',])
 
 if __name__ == '__main__':
     app.run()

@@ -60,16 +60,32 @@ def teardown_test_update():
 @with_setup(setup_test_update,teardown_test_update)
 def test_update():
     mongo = MongoModel()
-    data = mongo.get({'a':1})
+    data = mongo.query({'a':1})
     id = str(data['_id'])
     updated = {'a':2}
     client = webapp.app.test_client()
-    response = client.put('/api/%s' % id, data = json.dumps(updated),
+    response = client.put('/api/%s/' % id, data = json.dumps(updated),
             content_type='application/json')
 
     status = json.loads(response.data)
 
-    assert status['status'] == True
-    updated_data = mongo.get({'_id':objectid.ObjectId(id)})
+    assert status['status']
+    updated_data = mongo.query({'_id':objectid.ObjectId(id)})
     assert updated_data['a'] == 2
+
+def test_delete():
+    mongo = MongoModel()
+    client = webapp.app.test_client()
+
+    mongo.insert({'a':1})
+
+    data = mongo.query({'a':1})
+    id = str(data['_id'])
+    response = client.delete('/api/%s/' % (id))
+
+    status = json.loads(response.data)
+    assert status['status']
     
+    check = mongo.query({'_id':objectid.ObjectId(id)})
+    assert not check
+

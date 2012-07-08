@@ -30,9 +30,18 @@ class DataApi(MethodView):
         return jsonify({'status':True})
 
     def put(self,entry_id):
-        return jsonify({})
+        id = objectid.ObjectId(str(entry_id))
+        model = MongoModel()
+
+        model.update({'_id':id},request.json)
+        
+        return jsonify({'status':True})
 
     def delete(self,entry_id):
-        return jsonify({})
+        id = objectid.ObjectId(str(entry_id))
+        model = MongoModel()
+        model.delete({'_id':id})
+        
+        return jsonify({'status':True})
 
 
