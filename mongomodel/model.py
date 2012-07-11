@@ -35,3 +35,12 @@ class MongoModel(object):
             result.append(d)
         return result
 
+
+class DatabaseList(object):
+    def __init__(self):
+        self.conn = pymongo.Connection()
+
+    def list_project(self):
+        return self.conn.database_names()
+
+
