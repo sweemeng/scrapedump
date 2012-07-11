@@ -11,8 +11,8 @@ from flask import Response
 
 
 class DataApi(MethodView):
-    def get(self,entry_id):
-        model = MongoModel()
+    def get(self,project,entry,entry_id):
+        model = MongoModel(project=project,collection=entry)
         if entry_id:
             id = objectid.ObjectId(str(entry_id))
             result = model.query({'_id':id})
@@ -24,22 +24,22 @@ class DataApi(MethodView):
         resp.headers['Link'] = 'http://localhost:5000'
         return resp
 
-    def post(self):
-        model = MongoModel()
+    def post(self,project,entry):
+        model = MongoModel(project=project,collection=entry)
         model.insert(request.json)
         return jsonify({'status':True})
 
-    def put(self,entry_id):
+    def put(self,project,entry,entry_id):
         id = objectid.ObjectId(str(entry_id))
-        model = MongoModel()
+        model = MongoModel(project=project,collection=entry)
 
         model.update({'_id':id},request.json)
         
         return jsonify({'status':True})
 
-    def delete(self,entry_id):
+    def delete(self,project,entry,entry_id):
         id = objectid.ObjectId(str(entry_id))
-        model = MongoModel()
+        model = MongoModel(project=project,collection=entry)
         model.delete({'_id':id})
         
         return jsonify({'status':True})
