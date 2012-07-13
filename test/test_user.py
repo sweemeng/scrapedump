@@ -5,6 +5,7 @@ import bcrypt
 
 def test_empty_user():
     user = model.UserTemplate()
+    assert hasattr(user,'id')
     assert hasattr(user,'username')
     assert hasattr(user,'password')
     assert hasattr(user,'api_key')
