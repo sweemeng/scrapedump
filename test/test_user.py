@@ -1,4 +1,7 @@
 from user import model
+from mongomodel.model import MongoModel 
+from nose.tools import with_setup
+import bcrypt
 
 def test_empty_user():
     user = model.UserTemplate()
@@ -14,4 +17,23 @@ def test_empty_user():
     assert test_data.has_key('project') 
 
 def test_create_user():
-    pass
+    user = model.User()
+    test_username = 'test_user'
+    test_password = 'test_password'
+    
+    user.create(test_username,test_password)
+
+    passwd = user.user.password
+
+    assert user.user.username == test_username
+
+    assert bcrypt.hashpw(test_password,passwd) == passwd
+    
+    db = MongoModel(project='internal',collection='user')
+    
+    test_result = db.query({'username':test_username}) 
+    
+    assert test_result['username'] == test_username
+    assert bcrypt.hashpw(test_password,test_result['password']) == test_result['password'] 
+
+    db.delete({'username':test_username})
