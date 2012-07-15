@@ -1,6 +1,5 @@
 from mongomodel import model
 import bcrypt
-import datetime
 
 
 class User(object):
@@ -11,7 +10,15 @@ class User(object):
         self.user = UserTemplate()
     
     def login(self,username,password):
-        pass
+        temp = self.model.query({'username':username})
+        if temp:
+            self.user.from_mongo(temp)
+            user = self.user
+            if not bcrypt.hashpw(password,user.password) == user.password:
+                self.user = UserTemplate()
+        else:
+            self.user = UserTemplate()
+        return self
 
     def create(self,username,password):
         self.user.username = username
@@ -19,8 +26,19 @@ class User(object):
         self.user.active = True
         self.save()
 
-    def is_action(self):
-        self.user.active
+    def is_active(self):
+        return self.user.active
+
+    def is_authenticated(self):
+        if self.user.id:
+            return True
+        return False
+
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return self.user.id
 
     def get_api_key(self):
         pass
@@ -32,7 +50,8 @@ class User(object):
         pass
 
     def save(self):
-        self.model.insert(self.user.to_mongo())
+        id = self.model.insert(self.user.to_mongo())
+        self.user.id = str(id)
 
 class UserTemplate(object):
     def __init__(self):

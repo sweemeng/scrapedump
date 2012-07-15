@@ -2,6 +2,7 @@ from user import model
 from mongomodel.model import MongoModel 
 from nose.tools import with_setup
 import bcrypt
+from flask.ext.login import login_user
 
 def test_empty_user():
     user = model.UserTemplate()
@@ -40,3 +41,27 @@ def test_create_user():
     assert bcrypt.hashpw(test_password,test_result['password']) == test_result['password'] 
 
     db.delete({'username':test_username})
+
+def setup_test_login():
+    user = model.User()
+    user.create("test_user","test_password") 
+
+def teardown_test_login():
+    db = MongoModel(project='internal',collection='user')
+    db.delete({'username':'test_user'})
+
+@with_setup(setup_test_login,teardown_test_login)
+def test_login_user():
+    user = model.User()
+    result = user.login('test_user','test_password')
+    assert result.user.username == 'test_user'
+    assert bcrypt.hashpw('test_password',result.user.password) == result.user.password 
+    assert result.is_active() 
+
+def test_empty_user():
+    user = model.User()
+    result = user.login('test_user','test_password')
+    assert not result.user.username
+    assert not result.user.id
+    assert not result.is_active()
+
