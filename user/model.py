@@ -1,4 +1,6 @@
 from mongomodel import model
+from pymongo.objectid import ObjectId
+
 import bcrypt
 
 
@@ -39,6 +41,10 @@ class User(object):
 
     def get_id(self):
         return self.user.id
+
+    def get(self,id):
+        temp = self.model.query({'_id':ObjectId(str(id))})
+        return self.user.from_mongo(temp)
 
     def get_api_key(self):
         pass
