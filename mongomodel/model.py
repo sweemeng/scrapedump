@@ -20,7 +20,7 @@ class MongoModel(object):
         return result
 
     def insert(self,data):
-        self.entries.insert(data)
+        return self.entries.insert(data)
 
     def update(self,param,data):
         self.entries.update(param,{'$set':data})
