@@ -16,7 +16,11 @@ class User(object):
     def create(self,username,password):
         self.user.username = username
         self.user.password = bcrypt.hashpw(password,bcrypt.gensalt())
+        self.user.active = True
         self.save()
+
+    def is_action(self):
+        self.user.active
 
     def get_api_key(self):
         pass
@@ -25,9 +29,6 @@ class User(object):
         pass
 
     def set_project(self):
-        pass
-
-    def check_session(self,session_id):
         pass
 
     def save(self):
@@ -40,6 +41,7 @@ class UserTemplate(object):
         self.password = ''
         self.api_key = ''
         self.project = []
+        self.active = False
 
     def to_mongo(self):
         data = {}
@@ -47,6 +49,7 @@ class UserTemplate(object):
         data['password'] = self.password
         data['api_key'] = self.api_key
         data['project'] = self.project
+        data['active'] = self.active
         return data
     
     def from_mongo(self,data):
@@ -57,8 +60,3 @@ class UserTemplate(object):
             setattr(self,key,data[key])
 
 
-class SessionTemplate(object):
-    def __init__(self):
-        self.user_id = ''
-        self.session_id = ''
-        self.expiry = datetime.datetime.now()
