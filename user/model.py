@@ -49,6 +49,9 @@ class User(object):
         self.user.from_mongo(temp)
         return self
 
+    def get_auth_token(self):
+        return self.user.auth_token
+
     def get_api_key(self):
         pass
 
