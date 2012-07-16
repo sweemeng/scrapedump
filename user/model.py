@@ -52,9 +52,6 @@ class User(object):
     def get_auth_token(self):
         return self.user.auth_token
 
-    def get_api_key(self):
-        pass
-
     def get_project(self):
         pass
 
@@ -70,7 +67,6 @@ class UserTemplate(object):
         self.id = ''
         self.username = ''
         self.password = ''
-        self.api_key = ''
         self.project = []
         self.active = False
         self.auth_token = ''
@@ -79,7 +75,6 @@ class UserTemplate(object):
         data = {}
         data['username'] = self.username
         data['password'] = self.password
-        data['api_key'] = self.api_key
         data['project'] = self.project
         data['active'] = self.active
         data['auth_token'] = self.auth_token

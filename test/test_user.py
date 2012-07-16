@@ -11,7 +11,6 @@ def test_empty_user():
     assert hasattr(user,'id')
     assert hasattr(user,'username')
     assert hasattr(user,'password')
-    assert hasattr(user,'api_key')
     assert hasattr(user,'project')
     assert hasattr(user,'active')
     assert hasattr(user,'auth_token')
@@ -19,7 +18,6 @@ def test_empty_user():
     test_data = user.to_mongo()
     assert test_data.has_key('username')
     assert test_data.has_key('password')
-    assert test_data.has_key('api_key')
     assert test_data.has_key('project') 
     assert test_data.has_key('active')
     assert test_data.has_key('auth_token')
@@ -41,6 +39,7 @@ def test_create_user():
     print auth_token.hexdigest()
     print user.user.auth_token
     assert user.user.auth_token == auth_token.hexdigest()
+    assert user.get_auth_token() == auth_token.hexdigest()
     
     db = MongoModel(project='internal',collection='user')
     
