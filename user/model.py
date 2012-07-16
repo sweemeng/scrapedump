@@ -1,7 +1,7 @@
 from mongomodel import model
-from pymongo.objectid import ObjectId
-
+from bson.objectid import ObjectId
 import bcrypt
+import hashlib
 
 
 class User(object):
@@ -26,6 +26,8 @@ class User(object):
         self.user.username = username
         self.user.password = bcrypt.hashpw(password,bcrypt.gensalt())
         self.user.active = True
+        auth_token = hashlib.sha224('%s%s' % (username,self.user.password))
+        self.user.auth_token = auth_token.hexdigest()
         self.save()
 
     def is_active(self):
@@ -44,7 +46,8 @@ class User(object):
 
     def get(self,id):
         temp = self.model.query({'_id':ObjectId(str(id))})
-        return self.user.from_mongo(temp)
+        self.user.from_mongo(temp)
+        return self
 
     def get_api_key(self):
         pass
@@ -67,6 +70,7 @@ class UserTemplate(object):
         self.api_key = ''
         self.project = []
         self.active = False
+        self.auth_token = ''
 
     def to_mongo(self):
         data = {}
@@ -75,6 +79,7 @@ class UserTemplate(object):
         data['api_key'] = self.api_key
         data['project'] = self.project
         data['active'] = self.active
+        data['auth_token'] = self.auth_token
         return data
     
     def from_mongo(self,data):

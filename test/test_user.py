@@ -3,6 +3,8 @@ from mongomodel.model import MongoModel
 from nose.tools import with_setup
 import bcrypt
 from flask.ext.login import login_user
+import hashlib
+
 
 def test_empty_user():
     user = model.UserTemplate()
@@ -12,6 +14,7 @@ def test_empty_user():
     assert hasattr(user,'api_key')
     assert hasattr(user,'project')
     assert hasattr(user,'active')
+    assert hasattr(user,'auth_token')
     
     test_data = user.to_mongo()
     assert test_data.has_key('username')
@@ -19,6 +22,7 @@ def test_empty_user():
     assert test_data.has_key('api_key')
     assert test_data.has_key('project') 
     assert test_data.has_key('active')
+    assert test_data.has_key('auth_token')
 
 def test_create_user():
     user = model.User()
@@ -33,12 +37,18 @@ def test_create_user():
 
     assert bcrypt.hashpw(test_password,passwd) == passwd
     
+    auth_token = hashlib.sha224('%s%s' % (test_username,passwd))
+    print auth_token.hexdigest()
+    print user.user.auth_token
+    assert user.user.auth_token == auth_token.hexdigest()
+    
     db = MongoModel(project='internal',collection='user')
     
     test_result = db.query({'username':test_username}) 
     
     assert test_result['username'] == test_username
     assert bcrypt.hashpw(test_password,test_result['password']) == test_result['password'] 
+    assert test_result['auth_token'] == auth_token.hexdigest()
 
     db.delete({'username':test_username})
 
