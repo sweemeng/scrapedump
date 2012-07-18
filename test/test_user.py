@@ -35,7 +35,7 @@ def test_create_user():
 
     assert bcrypt.hashpw(test_password,passwd) == passwd
     
-    auth_token = hashlib.sha224('%s%s' % (test_username,passwd))
+    auth_token = hashlib.sha224('%s%s' % (test_username,test_password))
     assert user.user.auth_token == auth_token.hexdigest()
     assert user.get_auth_token() == auth_token.hexdigest()
     
@@ -45,6 +45,7 @@ def test_create_user():
     
     assert test_result['username'] == test_username
     assert bcrypt.hashpw(test_password,test_result['password']) == test_result['password'] 
+    assert test_result['auth_token'] == auth_token.hexdigest()
 
     db.delete({'username':test_username})
 

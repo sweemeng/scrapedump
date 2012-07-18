@@ -28,7 +28,7 @@ class User(object):
         self.user.username = username
         self.user.password = bcrypt.hashpw(password,bcrypt.gensalt())
         self.user.active = True
-        auth_token = hashlib.sha224('%s%s' % (username,self.user.password))
+        auth_token = hashlib.sha224('%s%s' % (username,password))
         self.user.auth_token = auth_token.hexdigest()
         self.save()
 
