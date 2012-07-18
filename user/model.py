@@ -6,9 +6,11 @@ import hashlib
 
 class User(object):
     def __init__(self):
-        project = 'internal'
-        collection = 'user'
-        self.model = model.MongoModel(project=project,collection=collection)
+        self.project = 'internal'
+        self.collection = 'user'
+        self.model = model.MongoModel(
+                         project=self.project,
+                         collection=self.collection)
         self.user = UserTemplate()
     
     def login(self,username,password):
@@ -53,10 +55,10 @@ class User(object):
         return self.user.auth_token
 
     def get_project(self):
-        pass
+        return self.user.project
 
-    def set_project(self):
-        pass
+    def set_project(self,project):
+        self.user.project.append(project)
 
     def save(self):
         id = self.model.insert(self.user.to_mongo())
