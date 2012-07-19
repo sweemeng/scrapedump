@@ -59,6 +59,20 @@ class User(object):
 
     def add_project(self,project):
         self.user.project.append(project)
+    
+    def update(self,password=None):
+        data = {}
+
+        if password:
+            username = self.user.username
+            auth_token = hashlib.sha224('%s%s' % (username,password))
+            password = bcrypt.hashpw(password,bcrypt.gensalt())
+            data['password'] = password
+            self.user.password = password
+            data['auth_token'] = auth_token.hexdigest()
+            self.user.auth_token = auth_token.hexdigest()
+            self.model.update({'_id':ObjectId(str(self.user.id))},data)
+          
 
     def save(self):
         id = self.model.insert(self.user.to_mongo())
@@ -88,5 +102,3 @@ class UserTemplate(object):
                 setattr(self,'id',str(data['_id']))
                 continue
             setattr(self,key,data[key])
-
-

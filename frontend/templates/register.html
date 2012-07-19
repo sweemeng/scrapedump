@@ -1,0 +1,16 @@
+<html>
+    <head>
+        <title>Settings</title>
+    </head>
+    <body>
+        <div id='user_settings'>
+            <form method="POST" action="">
+                {{ form.hidden_tag() }}
+                {{ form.username.label }} {{ form.username }}
+                {{ form.password.label }} {{ form.password }}
+                {{ form.confirm.label }} {{ form.confirm }}
+                <input type="submit" value="save">
+            </form>
+        </div>
+    </body>
+</html>
