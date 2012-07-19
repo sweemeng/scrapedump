@@ -1,4 +1,5 @@
 from mongomodel import model
+from bson.objectid import ObjectId
 
 
 class Project(object):
@@ -22,10 +23,14 @@ class Project(object):
         self.model.description = description
         self.save()        
  
+    def get(self,id):
+        self.model.query({'_id':ObjectId(str(id))})
+        return self
+
     def save(self):
         id = self.model.insert(self.project.to_mongo())
         self.project.id = id
-
+    
 
 class ProjectTemplate(object):
     def __init__(self):
