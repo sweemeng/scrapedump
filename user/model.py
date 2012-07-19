@@ -57,7 +57,7 @@ class User(object):
     def get_project(self):
         return self.user.project
 
-    def set_project(self,project):
+    def add_project(self,project):
         self.user.project.append(project)
 
     def save(self):
