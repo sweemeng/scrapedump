@@ -21,3 +21,22 @@ def test_login():
         'password':'test_password'
     },follow_redirects=True)
     assert 'user is logged in' in result.data
+    
+    result = test_client.get('/logout/',follow_redirects=True)
+    print result.data 
+    assert 'user is logged out' in result.data
+
+def test_main_page():
+    pass
+
+def test_user_settings():
+    pass
+
+def test_project_settings():
+    pass
+
+def test_project_page():
+    pass
+
+def test_join_project():
+    pass
