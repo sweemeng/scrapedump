@@ -20,11 +20,11 @@ def test_login():
         'username':'test_user',
         'password':'test_password'
     },follow_redirects=True)
-    assert 'user is logged in' in result.data
+    assert 'test_user' in result.data
     
     result = test_client.get('/logout/',follow_redirects=True)
     print result.data 
-    assert 'user is logged out' in result.data
+    assert 'Annonymous' in result.data
 
 def test_main_page():
     pass

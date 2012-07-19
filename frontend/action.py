@@ -13,8 +13,9 @@ frontend = Blueprint('frontend',__name__,
 @frontend.route('/')
 def index():
     if current_user.is_authenticated():
-        return "user is logged in"
+        username = current_user.user.username
     else:
-        return "user is logged out"
+        username = "Annonymous"
+    return render_template("main_page.html",username=username)
 
 
