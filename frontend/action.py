@@ -25,7 +25,7 @@ def settings():
     user = current_user.user
     form = UserUpdateForm(csrf_enabled=False,obj=user)
     if form.validate_on_submit():
-        current_user.update(form.password.data)
+        current_user.update(form.password.data,form.email.data)
         user = current_user.user
         
     form.populate_obj(user) 
@@ -36,6 +36,6 @@ def register():
     user = User()
     form = UserForm(csrf_enabled=False)
     if form.validate_on_submit():
-        user.create(form.username.data,form.password.data)
+        user.create(form.username.data,form.password.data,form.email.data)
         
     return render_template('register.html',form=form)

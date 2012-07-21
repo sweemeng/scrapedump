@@ -5,7 +5,7 @@ from mongomodel.model import MongoModel
 
 def setup_login():
     user = User()
-    user.create('test_user','test_password')
+    user.create('test_user','test_password','test@example.com')
 
 def teardown_login():
     user = User()
@@ -65,12 +65,14 @@ def test_user_settings():
 def test_user_registration():
     username = 'test_register'
     password = 'test_password'
+    email = 'test@example.com'
 
     test_client = webapp.app.test_client()
     create = test_client.post('/register/',data={
         'username':username,
         'password':password,
-        'confirm':password        
+        'confirm':password,
+        'email':email    
     },follow_redirects=True)
     
     user = User()

@@ -24,9 +24,10 @@ class User(object):
             self.user = UserTemplate()
         return self
 
-    def create(self,username,password):
+    def create(self,username,password,email):
         self.user.username = username
         self.user.password = bcrypt.hashpw(password,bcrypt.gensalt())
+        self.user.email = email
         self.user.active = True
         auth_token = hashlib.sha224('%s%s' % (username,password))
         self.user.auth_token = auth_token.hexdigest()
@@ -60,7 +61,7 @@ class User(object):
     def add_project(self,project):
         self.user.project.append(project)
     
-    def update(self,password=None):
+    def update(self,password=None,email=None):
         data = {}
 
         if password:
@@ -71,6 +72,12 @@ class User(object):
             self.user.password = password
             data['auth_token'] = auth_token.hexdigest()
             self.user.auth_token = auth_token.hexdigest()
+
+        if email:
+            data['email'] = email
+            self.user.email = email
+
+        if data:
             self.model.update({'_id':ObjectId(str(self.user.id))},data)
           
 
@@ -83,6 +90,7 @@ class UserTemplate(object):
         self.id = ''
         self.username = ''
         self.password = ''
+        self.email = ''
         self.project = []
         self.active = False
         self.auth_token = ''
@@ -91,6 +99,7 @@ class UserTemplate(object):
         data = {}
         data['username'] = self.username
         data['password'] = self.password
+        data['email'] = self.email
         data['project'] = self.project
         data['active'] = self.active
         data['auth_token'] = self.auth_token
