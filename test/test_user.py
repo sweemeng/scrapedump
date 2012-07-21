@@ -80,13 +80,28 @@ def test_empty_user():
     assert not result.is_active()
 
 @with_setup(setup_test_login,teardown_test_login)
-def test_update_user():
+def test_update_user_password():
     user = model.User()
     test_user = user.login('test_user','test_password')
     test_user.update(password='test_pass')
     auth_token = hashlib.sha224('%s%s' % ('test_user','test_pass'))
     assert bcrypt.hashpw('test_pass',test_user.user.password) == test_user.user.password
     assert test_user.user.auth_token == auth_token.hexdigest()
+    
+    db = MongoModel(project='internal',collection='user')
+    
+    test_result = db.query({'username':'test_user'}) 
+    
+    assert bcrypt.hashpw('test_pass',test_result['password']) == test_result['password'] 
+    assert test_result['auth_token'] == auth_token.hexdigest()
+
+    test_user = user.login('test_user','test_pass')
+    assert user.is_authenticated()
+
+@with_setup(setup_test_login,teardown_test_login)
+def test_update_user_email():
+    user = model.User()
+    test_user = user.login('test_user','test_password')
     
     test_user.update(email='test@example.com')
     assert test_user.user.email == 'test@example.com'
@@ -95,10 +110,6 @@ def test_update_user():
     
     test_result = db.query({'username':'test_user'}) 
     
-    assert bcrypt.hashpw('test_pass',test_result['password']) == test_result['password'] 
-    assert test_result['auth_token'] == auth_token.hexdigest()
     assert test_result['email'] == 'test@example.com'
 
-    test_user = user.login('test_user','test_pass')
-    assert user.is_authenticated()
 
