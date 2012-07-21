@@ -37,7 +37,7 @@ def test_user_settings():
     user = User()
     username = 'test_user'
     password = 'test_password'
-    user.login('test_user','test_password')
+    user.login(username,password)
     
     result = test_client.post('/login/',data={
         'username':username,
@@ -49,3 +49,14 @@ def test_user_settings():
 
     # create an update call, then check data
     # remember to reauthenticate 
+    
+    password = 'test_pass'
+    result = test_client.post('/settings/',data={
+        'password':password,
+        'confirm':password
+    },follow_redirects=True)
+
+    user = User()    
+    user.login(username,password)
+     
+    assert user.user.auth_token in result.data
