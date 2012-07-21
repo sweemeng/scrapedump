@@ -24,7 +24,7 @@ def test_empty_user():
 
 def test_create_user():
     user = model.User()
-    test_username = 'test_user'
+    test_username = 'test_user_create'
     test_password = 'test_password'
     
     user.create(test_username,test_password)
@@ -44,6 +44,7 @@ def test_create_user():
     test_result = db.query({'username':test_username}) 
     
     assert test_result['username'] == test_username
+    
     assert bcrypt.hashpw(test_password,test_result['password']) == test_result['password'] 
     assert test_result['auth_token'] == auth_token.hexdigest()
 
