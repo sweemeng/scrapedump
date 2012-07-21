@@ -61,3 +61,21 @@ def test_user_settings():
     
     assert user.is_authenticated()
     assert user.user.auth_token in result.data
+
+def test_user_registration():
+    username = 'test_register'
+    password = 'test_password'
+
+    test_client = webapp.app.test_client()
+    create = test_client.post('/register/',data={
+        'username':username,
+        'password':password,
+        'confirm':password        
+    },follow_redirects=True)
+    
+    user = User()
+    user.login(username,password)
+    assert user.is_authenticated()
+    
+    
+    
