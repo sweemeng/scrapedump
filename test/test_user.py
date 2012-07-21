@@ -88,3 +88,6 @@ def test_update_user():
     assert bcrypt.hashpw('test_pass',test_result['password']) == test_result['password'] 
     assert test_result['auth_token'] == auth_token.hexdigest()
 
+    test_user = user.login('test_user','test_pass')
+    assert user.is_authenticated()
+

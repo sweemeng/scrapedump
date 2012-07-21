@@ -20,7 +20,7 @@ def index():
         username = "Annonymous"
     return render_template("main_page.html",username=username)
 
-@frontend.route('/settings/')
+@frontend.route('/settings/',methods=['POST','GET'])
 def settings():
     user = current_user.user
     form = UserUpdateForm(csrf_enabled=False,obj=user)

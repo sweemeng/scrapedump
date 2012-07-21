@@ -58,5 +58,6 @@ def test_user_settings():
 
     user = User()    
     user.login(username,password)
-     
+    
+    assert user.is_authenticated()
     assert user.user.auth_token in result.data
