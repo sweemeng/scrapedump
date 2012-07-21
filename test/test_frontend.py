@@ -77,5 +77,8 @@ def test_user_registration():
     user.login(username,password)
     assert user.is_authenticated()
     
+    db = MongoModel(project=user.project,collection=user.collection)
+    db.delete({'username':username})
+ 
     
     
