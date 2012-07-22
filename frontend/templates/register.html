@@ -7,6 +7,7 @@
             <form method="POST" action="">
                 {{ form.hidden_tag() }}
                 {{ form.username.label }} {{ form.username }}
+                {{ form.email.label }} {{ form.email }}
                 {{ form.password.label }} {{ form.password }}
                 {{ form.confirm.label }} {{ form.confirm }}
                 <input type="submit" value="save">

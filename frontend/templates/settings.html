@@ -6,6 +6,7 @@
         <div id='user_settings'>
             <form method="POST" action="">
                 {{ form.hidden_tag() }}
+                {{ form.email.label }} {{ form.email }}
                 {{ form.password.label }} {{ form.password }}
                 {{ form.confirm.label }} {{ form.confirm }}
                 <input type="submit" value="save">
