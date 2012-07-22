@@ -73,7 +73,7 @@ def teardown_user_settings_email():
     db = MongoModel(project=user.project,collection=user.collection)
     db.delete({'_id':user.user.id})
      
-
+@with_setup(setup_user_settings_email,teardown_user_settings_email)
 def test_user_settings_email():
     test_client = webapp.app.test_client()
     
