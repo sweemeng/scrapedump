@@ -23,6 +23,14 @@ class User(object):
         else:
             self.user = UserTemplate()
         return self
+    
+    def api_login(self,auth_token):
+        temp = self.model.query({'auth_token':auth_token})
+        if temp:
+            self.user.from_mongo(temp)
+        else:
+            self.user = UserTemplate()
+        return self
 
     def create(self,username,password,email):
         self.user.username = username
@@ -51,7 +59,7 @@ class User(object):
         temp = self.model.query({'_id':ObjectId(str(id))})
         self.user.from_mongo(temp)
         return self
-
+    
     def get_auth_token(self):
         return self.user.auth_token
 
@@ -79,7 +87,6 @@ class User(object):
 
         if data:
             self.model.update({'_id':ObjectId(str(self.user.id))},self.user.to_mongo())
-          
 
     def save(self):
         id = self.model.insert(self.user.to_mongo())
