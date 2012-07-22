@@ -21,6 +21,7 @@ def index():
     return render_template("main_page.html",username=username)
 
 @frontend.route('/settings/',methods=['POST','GET'])
+@login_required
 def settings():
     user = current_user.user
     form = UserUpdateForm(csrf_enabled=False,obj=user)
