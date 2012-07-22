@@ -78,7 +78,7 @@ class User(object):
             self.user.email = email
 
         if data:
-            self.model.update({'_id':ObjectId(str(self.user.id))},data)
+            self.model.update({'_id':ObjectId(str(self.user.id))},self.user.to_mongo())
           
 
     def save(self):
