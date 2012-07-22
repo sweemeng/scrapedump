@@ -62,34 +62,37 @@ def test_user_settings_password():
     assert user.is_authenticated()
     assert user.user.auth_token in result.data
 
-@with_setup(setup_login,teardown_login)
+# this test is failing
 def test_user_settings_email():
     test_client = webapp.app.test_client()
     user = User()
-    username = 'test_user'
+    user.create('test_user_email','test_password','test@example.com')
+    
+    user = User()
+    username = 'test_user_email'
     password = 'test_password'
     user.login(username,password)
-    
+
     result = test_client.post('/login/',data={
         'username':username,
         'password':password
     },follow_redirects=True)
-    
     result = test_client.get('/settings/',follow_redirects=True)
-    assert user.user.auth_token in result.data
+    assert user.user.email in result.data
 
     # create an update call, then check data
     # remember to reauthenticate 
     
-    password = 'test_pass'
     result = test_client.post('/settings/',data={
-        'email':'test@example.com'
+        'email':'tester@example.com'
     },follow_redirects=True)
 
     user = User()    
     user.login(username,password)
     
-    assert user.user.email == 'test@example.com'
+    assert user.user.email == 'tester@example.com'
+    db = MongoModel(project=user.project,collection=user.collection)
+    db.delete({'_id':user.user.id})
 
 
 def test_user_registration():
