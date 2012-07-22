@@ -24,13 +24,35 @@ class Project(object):
         self.save()        
  
     def get(self,id):
-        self.model.query({'_id':ObjectId(str(id))})
+        result = self.model.query({'_id':ObjectId(str(id))})
+        self.project.from_mongo(result)
         return self
+
+    def find(self,name):
+        self.model.query({'name':name})
 
     def save(self):
         id = self.model.insert(self.project.to_mongo())
         self.project.id = id
+
+
+class ProjectList(object):
+    def __init__(self):
+        self.project_ = 'internal'
+        self.collection_ = 'project'
+        self.model = MongoModel(
+            project=self.project_,
+            collection= self.collection_
+        )
     
+    def all(self):
+        result = self.model.all()
+        project = Project()
+        for entry in result:
+            id = str(entry['_id'])
+            project.get(id)
+            yield project
+
 
 class ProjectTemplate(object):
     def __init__(self):
