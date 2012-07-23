@@ -34,6 +34,9 @@ class Project(object):
     def save(self):
         id = self.model.insert(self.project.to_mongo())
         self.project.id = id
+    
+    def to_mongo_name(self):
+        return self.project.name.replace('_')
 
 
 class ProjectList(object):
@@ -62,6 +65,8 @@ class ProjectTemplate(object):
        
     def to_mongo(self):
         data = {}
+        if self.id:
+            data['_id'] = ObjectId(str(self.id))
         data['name'] = self.name
         data['description'] = self.description
         return data
