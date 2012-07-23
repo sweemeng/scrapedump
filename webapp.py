@@ -10,6 +10,7 @@ from forms.login import LoginForm
 from flask import flash
 
 from api.data import DataApi
+from api.project import ProjectApi
 from user.model import User
 from frontend.action import frontend
 
@@ -51,12 +52,19 @@ def unauthorized():
 
 
 api_views = DataApi.as_view('api')
+project_api = ProjectApi.as_view('project')
 
 app.add_url_rule('/api/<project>/<entry>/',defaults={'entry_id':None},
         view_func=api_views,methods=['GET',])
 app.add_url_rule('/api/<project>/<entry>/',view_func=api_views,methods=['POST',])
 app.add_url_rule('/api/<project>/<entry>/<entry_id>/',
         view_func=api_views,methods=['GET','PUT','DELETE',])
+
+app.add_url_rule('/api/project/<project_id>/',defaults={'project_id':None},
+        view_func=project_api,methods=['GET',])
+app.add_url_rule('/api/project/',view_func=project_api,methods=['POST',])
+app.add_url_rule('/api/project/<project_id>/',
+        view_func=project_api,methods=['GET','PUT','DELETE',])
 
 app.register_blueprint(frontend,url_prefix='')
 
