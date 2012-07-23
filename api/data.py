@@ -31,6 +31,10 @@ class DataApi(MethodView):
         user.api_login(api_key)
         if not user.is_authenticated():
             return jsonify({'status':False})
+
+        if project not in user.project:
+            return jsonify({'status':False})
+
         model = MongoModel(project=project,collection=entry)
         model.insert(request.json)
         return jsonify({'status':True})
@@ -40,6 +44,9 @@ class DataApi(MethodView):
         user = User()
         user.api_login(api_key)
         if not user.is_authenticated():
+            return jsonify({'status':False})
+
+        if project not in user.project:
             return jsonify({'status':False})
 
         id = objectid.ObjectId(str(entry_id))
@@ -54,6 +61,9 @@ class DataApi(MethodView):
         user = User()
         user.api_login(api_key)
         if not user.is_authenticated():
+            return jsonify({'status':False})
+
+        if project not in user.project:
             return jsonify({'status':False})
 
         id = objectid.ObjectId(str(entry_id))
