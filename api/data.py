@@ -2,6 +2,7 @@ from flask.views import MethodView
 from flask import jsonify
 
 from mongomodel.model import MongoModel
+from user.model import User
 import  bson
 import bson.objectid as objectid
 import bson.json_util
@@ -25,11 +26,22 @@ class DataApi(MethodView):
         return resp
 
     def post(self,project,entry):
+        api_key = request.args.get('api_key')
+        user = User()
+        user.api_login(api_key)
+        if not user.is_authenticated():
+            return jsonify({'status':False})
         model = MongoModel(project=project,collection=entry)
         model.insert(request.json)
         return jsonify({'status':True})
 
     def put(self,project,entry,entry_id):
+        api_key = request.args.get('api_key')
+        user = User()
+        user.api_login(api_key)
+        if not user.is_authenticated():
+            return jsonify({'status':False})
+
         id = objectid.ObjectId(str(entry_id))
         model = MongoModel(project=project,collection=entry)
 
@@ -38,6 +50,12 @@ class DataApi(MethodView):
         return jsonify({'status':True})
 
     def delete(self,project,entry,entry_id):
+        api_key = request.args.get('api_key')
+        user = User()
+        user.api_login(api_key)
+        if not user.is_authenticated():
+            return jsonify({'status':False})
+
         id = objectid.ObjectId(str(entry_id))
         model = MongoModel(project=project,collection=entry)
         model.delete({'_id':id})
