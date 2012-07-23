@@ -9,8 +9,7 @@ from flask.ext.login import login_required
 from forms.login import LoginForm
 from flask import flash
 
-from dummy.action import DummyApi
-from api.actions import DataApi
+from api.data import DataApi
 from user.model import User
 from frontend.action import frontend
 
@@ -53,7 +52,6 @@ def unauthorized():
 
 api_views = DataApi.as_view('api')
 
-app.add_url_rule('/dummy/',view_func=DummyApi.as_view('dummy'))
 app.add_url_rule('/api/<project>/<entry>/',defaults={'entry_id':None},
         view_func=api_views,methods=['GET',])
 app.add_url_rule('/api/<project>/<entry>/',view_func=api_views,methods=['POST',])
