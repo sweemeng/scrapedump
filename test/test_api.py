@@ -18,7 +18,7 @@ def teardown_test_get():
 
 def setup_user():
     user = User()
-    user.create('test_user','test_pass')
+    user.create('test_user','test_pass','test@example.com')
 
 def teardown_user():
     user = User()
@@ -71,7 +71,7 @@ def setup_test_update():
     mongo = MongoModel(project='scraped',collection='entry')
     mongo.insert({'a':1})
     user = User()
-    user.create('test_user','test_pass')
+    user.create('test_user','test_pass','test@example.com')
 
 
 def teardown_test_update():
