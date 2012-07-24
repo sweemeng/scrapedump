@@ -29,7 +29,9 @@ class Project(object):
         return self
 
     def find(self,name):
-        self.model.query({'name':name})
+        result = self.model.query({'name':name})
+        self.project.from_mongo(result)
+        return self
 
     def save(self):
         id = self.model.insert(self.project.to_mongo())
