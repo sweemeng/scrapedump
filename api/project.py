@@ -1,7 +1,8 @@
 from flask.views import MethodView
 from flask import jsonify
 
-from project.model import Project
+from projectmodel.model import Project
+from projectmodel.model import ProjectList
 from mongomodel.model import MongoModel
 from user.model import User
 import bson
@@ -16,12 +17,12 @@ class ProjectApi(MethodView):
     def get(self,project_id):
         if project_id:
             project = Project()
-            project.get(id)
+            project.get(project_id)
             data = project.project.to_mongo()
         else:
             project = ProjectList()
             data = []
-            for p in project:
+            for p in project.all():
                 data.append(p.project.to_mongo())
         
         data = json.dumps(data,default=bson.json_util.default)

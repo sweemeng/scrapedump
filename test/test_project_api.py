@@ -1,7 +1,7 @@
 import webapp
 from user.model import User
-from project.model import Project
-from project.model import ProjectList
+from projectmodel.model import Project
+from projectmodel.model import ProjectList
 from mongomodel.model import MongoModel
 from nose.tools import with_setup
 import json
@@ -40,6 +40,7 @@ def test_project_list():
     )
     test_client = webapp.app.test_client()
     result = test_client.get('/api/project/')
+    print result.data
     for d in data:
         assert d[0] in result.data
         assert d[1] in result.data
@@ -67,7 +68,7 @@ def setup_user():
     user = User()
     user.create('test_user','test_pass','test@example.com')
 
-def teardown_user()
+def teardown_user():
     user = User()
     user.login('test_user','test_pass')
     model = MongoModel(project=user.project,collection=user.collection)

@@ -19,12 +19,13 @@ class Project(object):
         return '/%s/' % self.project.name.replace(' ','_')
      
     def create(self,name,description):
-        self.model.name = name
-        self.model.description = description
+        self.project.name = name
+        self.project.description = description
         self.save()        
  
-    def get(self,id):
-        result = self.model.query({'_id':ObjectId(str(id))})
+    def get(self,id_):
+        print id_
+        result = self.model.query({'_id':ObjectId(str(id_))})
         self.project.from_mongo(result)
         return self
 
@@ -45,7 +46,7 @@ class ProjectList(object):
     def __init__(self):
         self.project_ = 'internal'
         self.collection_ = 'project'
-        self.model = MongoModel(
+        self.model = model.MongoModel(
             project=self.project_,
             collection= self.collection_
         )
