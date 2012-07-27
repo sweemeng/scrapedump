@@ -19,6 +19,7 @@ def teardown_test_get():
 def setup_user():
     user = User()
     user.create('test_user','test_pass','test@example.com')
+    user.add_project('scraped')
 
 def teardown_user():
     user = User()
@@ -29,7 +30,7 @@ def teardown_user():
 @with_setup(setup_test_get,teardown_test_get)
 def test_get_all():
     client = webapp.app.test_client()
-    response = client.get('/api/scraped/entry/')
+    response = client.get('/api/db/scraped/entry/')
     result = json.loads(response.data)
     
     assert result[0]['a'] == 1
@@ -41,7 +42,7 @@ def test_get():
 
     data = mongo.all()
     id = str(data[0]['_id'])
-    response = client.get('/api/scraped/entry/%s/' % (id))
+    response = client.get('/api/db/scraped/entry/%s/' % (id))
     result = json.loads(response.data)
 
     assert result['a'] == 1
@@ -50,11 +51,11 @@ def test_get():
 def test_insert():
     user = User()
     user.login('test_user','test_pass')
-    api_key = user.user.api_key
+    api_key = user.user.auth_token
     client = webapp.app.test_client()
     data = {'a':1}
 
-    url = '/api/scraped/entry/?api_key=%s' % api_key
+    url = '/api/db/scraped/entry/?api_key=%s' % api_key
     response = client.post(url,data=json.dumps(data),
             content_type='application/json')
     
@@ -72,6 +73,7 @@ def setup_test_update():
     mongo.insert({'a':1})
     user = User()
     user.create('test_user','test_pass','test@example.com')
+    user.add_project('scraped')
 
 
 def teardown_test_update():
@@ -87,13 +89,13 @@ def teardown_test_update():
 def test_update():
     user = User()
     user.login('test_user','test_pass')
-    api_key = user.user.api_key
+    api_key = user.user.auth_token
     
     mongo = MongoModel(project='scraped',collection='entry')
     data = mongo.query({'a':1})
     id = str(data['_id'])
     updated = {'a':2}
-    url = '/api/scraped/entry/%s/?api_key=%s' % (id,api_key) 
+    url = '/api/db/scraped/entry/%s/?api_key=%s' % (id,api_key) 
     
     client = webapp.app.test_client()
     response = client.put(url, data = json.dumps(updated),
@@ -109,8 +111,8 @@ def test_update():
 def test_delete():
     user = User()
     user.login('test_user','test_pass')
-    api_key = user.user.api_key
-
+    print user.user.project
+    api_key = user.user.auth_token
     mongo = MongoModel(project='scraped',collection='entry')
     client = webapp.app.test_client()
 
@@ -118,10 +120,11 @@ def test_delete():
 
     data = mongo.query({'a':1})
     id = str(data['_id'])
-    url = '/api/scraped/entry/%s/?api_key=%s' % (id,api_key) 
+    url = '/api/db/scraped/entry/%s/?api_key=%s' % (id,api_key) 
     response = client.delete(url)
 
     status = json.loads(response.data)
+    print response.data
     assert status['status']
     
     check = mongo.query({'_id':objectid.ObjectId(id)})

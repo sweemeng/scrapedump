@@ -68,6 +68,7 @@ class User(object):
 
     def add_project(self,project):
         self.user.project.append(project)
+        self.model.update({'_id':ObjectId(str(self.user.id))},self.user.to_mongo())
     
     def update(self,password=None,email=None):
         data = {}
