@@ -24,7 +24,6 @@ class Project(object):
         self.save()        
  
     def get(self,id_):
-        print id_
         result = self.model.query({'_id':ObjectId(str(id_))})
         self.project.from_mongo(result)
         return self
@@ -35,8 +34,11 @@ class Project(object):
         return self
 
     def save(self):
-        id = self.model.insert(self.project.to_mongo())
-        self.project.id = id
+        if self.project.id:
+            self.model.update({'_id':ObjectId(str(self.project.id))},self.project.to_mongo())
+        else:
+            id = self.model.insert(self.project.to_mongo())
+            self.project.id = id
     
     def to_mongo_name(self):
         return self.project.name.replace(' ','_')
@@ -68,8 +70,6 @@ class ProjectTemplate(object):
        
     def to_mongo(self):
         data = {}
-        if self.id:
-            data['_id'] = ObjectId(str(self.id))
         data['name'] = self.name
         data['description'] = self.description
         return data

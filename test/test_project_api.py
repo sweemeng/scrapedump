@@ -102,7 +102,7 @@ def test_project_create():
 
 def setup_project_delete():
     user = User()
-    user.create('test_user_delete','test_pass')
+    user.create('test_user_delete','test_pass','test@example.com')
     project = Project()
     project.create('project 1','project content 1')
     user.add_project('project_1')
@@ -112,11 +112,12 @@ def teardown_project_delete():
     user.login('test_user_delete','test_pass')
     project = Project()
     model = MongoModel(project=user.project,collection=user.collection)
-    model.delete({'_id':Object(user.user.id)})
+    model.delete({'_id':ObjectId(user.user.id)})
     project.find('project 1')
     model = MongoModel(project=project.project_,collection=project.collection_)
     model.delete({'name':'project 1'})
 
+@with_setup(setup_project_delete,teardown_project_delete)
 def test_project_delete():
     # login user get token
     user = User()
@@ -128,6 +129,7 @@ def test_project_delete():
     test_client = webapp.app.test_client()
     url = '/api/project/%s/?api_key=%s' % (project.project.id,api_key)
     result = test_client.delete(url)
+    status = json.loads(result.data)
     # now check user don't exist
     project = Project()
     model = MongoModel(project=project.project_,collection=project.collection_)
@@ -142,19 +144,39 @@ def test_project_delete():
 
 def setup_user_project():
     # now create user
-    
+    user = User()
+    user.create('test_user_update','test_pass','test@example.com') 
     # create project
-
+    project = Project()
+    project.create('project update','project update content')
     # associate project
-    
-    pass
+    user.add_project('project_update')
 
 def teardown_user_project():
-    pass
-
-# Now need to create user and project at the same time
+    user = User()
+    model = MongoModel(project=user.project,collection=user.collection)
+    model.delete({'username':'test_user_update'})
+    project = Project()
+    model = MongoModel(project=project.project_,collection=project.collection_)
+    model.delete({'name':'project update'})
+    
+@with_setup(setup_user_project,teardown_user_project)
 def test_project_update():
-    pass
+    user = User()
+    user.login('test_user_update','test_pass')
+    api_key = user.user.auth_token
+    project = Project()
+    project.find('project update')
+    test_client = webapp.app.test_client()
+    url = '/api/project/%s/?api_key=%s' % (project.project.id,api_key)
+    data = json.dumps({'description':'project updated content'})
+    result = test_client.put(url,data=data,content_type='application/json')
+    status = json.loads(result.data)
+    assert status['status']
+    
+    project=Project()
+    project.find('project update')
+    assert project.project.description == 'project updated content'
 
 # now project created, you join or withdraw
 # you are talking about user info, so go figure

@@ -53,8 +53,11 @@ class ProjectApi(MethodView):
         project = Project()
         project.get(project_id)
         
+        if not project.project.name_to_mongo() in user.user.project:
+            return jsonify({'status':False})
+        
         data = request.json
-        project.description = data['description']
+        project.project.description = data['description']
         project.save()
         return jsonify({'status':True})
     
@@ -67,9 +70,9 @@ class ProjectApi(MethodView):
 
         project = Project()
         project.get(project_id)
-        if not project.get_mongo_name() in user.user.project:
+        if not project.project.name_to_mongo() in user.user.project:
             return jsonify({'status':False})
-        user.user.project.remove(project.project.name_to_mongo())
+        user.remove_project(project.project.name_to_mongo())
         model = MongoModel(project=project.project_,collection=project.collection_)
         model.delete({'_id':objectid.ObjectId(str(project_id))})
         
