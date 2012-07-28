@@ -68,7 +68,11 @@ class User(object):
 
     def add_project(self,project):
         self.user.project.append(project)
-        self.model.update({'_id':ObjectId(str(self.user.id))},self.user.to_mongo())
+        self.save()
+    
+    def remove_project(self,project):
+        self.user.project.remove(project)
+        self.save()
     
     def update(self,password=None,email=None):
         data = {}
@@ -87,11 +91,14 @@ class User(object):
             self.user.email = email
 
         if data:
-            self.model.update({'_id':ObjectId(str(self.user.id))},self.user.to_mongo())
+            self.save()
 
     def save(self):
-        id = self.model.insert(self.user.to_mongo())
-        self.user.id = str(id)
+        if self.user.id:
+            self.model.update({'_id':ObjectId(str(self.user.id))},self.user.to_mongo())
+        else:
+            id = self.model.insert(self.user.to_mongo())
+            self.user.id = str(id)
 
 class UserTemplate(object):
     def __init__(self):
