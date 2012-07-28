@@ -39,7 +39,7 @@ class Project(object):
         self.project.id = id
     
     def to_mongo_name(self):
-        return self.project.name.replace('_')
+        return self.project.name.replace(' ','_')
 
 
 class ProjectList(object):
@@ -75,9 +75,13 @@ class ProjectTemplate(object):
         return data
     
     def from_mongo(self,data):
+        if not data:
+            return 
         for key in data:
             if key == '_id':
                 setattr(self,'id',str(data['_id']))
                 continue
             setattr(self,key,data[key])
-
+    
+    def name_to_mongo(self):
+        return self.name.replace(' ','_')

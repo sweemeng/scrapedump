@@ -100,13 +100,45 @@ def test_project_create():
     model = MongoModel(project=project.project_,collection=project.collection_)
     model.delete({'name':'project 1'})
 
+def setup_project_delete():
+    user = User()
+    user.create('test_user_delete','test_pass')
+    project = Project()
+    project.create('project 1','project content 1')
+    user.add_project('project_1')
+
+def teardown_project_delete():
+    user = User()
+    user.login('test_user_delete','test_pass')
+    project = Project()
+    model = MongoModel(project=user.project,collection=user.collection)
+    model.delete({'_id':Object(user.user.id)})
+    project.find('project 1')
+    model = MongoModel(project=project.project_,collection=project.collection_)
+    model.delete({'name':'project 1'})
+
 def test_project_delete():
     # login user get token
-    
+    user = User()
+    user.login('test_user_delete','test_pass')
+    api_key = user.user.auth_token
+    project = Project()
+    project.find('project 1')
     # do a delete
-    
+    test_client = webapp.app.test_client()
+    url = '/api/project/%s/?api_key=%s' % (project.project.id,api_key)
+    result = test_client.delete(url)
     # now check user don't exist
-    pass
+    project = Project()
+    model = MongoModel(project=project.project_,collection=project.collection_)
+    data = model.query({'name':'project 1'})
+    assert not data
+
+    test_user = User()
+    test_user.login('test_user_delete','test_pass')
+    assert 'project_1' not in test_user.user.project
+
+    
 
 def setup_user_project():
     # now create user
