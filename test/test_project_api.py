@@ -40,7 +40,6 @@ def test_project_list():
     )
     test_client = webapp.app.test_client()
     result = test_client.get('/api/project/')
-    print result.data
     for d in data:
         assert d[0] in result.data
         assert d[1] in result.data
@@ -77,11 +76,29 @@ def teardown_user():
 # Now anything that need to update db will need to
 def test_project_create():
     # login user get token
-    
+    user = User()
+    user.login('test_user','test_pass')
+    api_key = user.user.auth_token 
     # do a post
-    
+    url = '/api/project/?api_key=%s' % api_key
     # now check project in user
-    pass
+    test_client = webapp.app.test_client()
+    data = {'name':'project 1','description':'project content 1'}
+    
+    result = test_client.post(url,data=json.dumps(data),content_type='application/json')
+    status = json.loads(result.data)
+    assert status['status']
+    project = ProjectList()
+    test_user = User()
+    test_user.login('test_user','test_pass')
+    assert 'project 1' in test_user.user.project
+    for i in project.all():
+        assert 'project 1' == i.project.name
+    
+    # now delete it
+    project = Project()
+    model = MongoModel(project=project.project_,collection=project.collection_)
+    model.delete({'name':'project 1'})
 
 def test_project_delete():
     # login user get token

@@ -40,6 +40,7 @@ class ProjectApi(MethodView):
         data = request.json
         project = Project()
         project.create(data['name'],data['description'])
+        user.add_project(data['name'])
         return jsonify({'status':True})
     
     def put(self,project_id):
