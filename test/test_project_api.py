@@ -91,7 +91,7 @@ def test_project_create():
     project = ProjectList()
     test_user = User()
     test_user.login('test_user','test_pass')
-    assert 'project 1' in test_user.user.project
+    assert 'project 1'.replace(' ','_') in test_user.user.project
     for i in project.all():
         assert 'project 1' == i.project.name
     

@@ -40,7 +40,7 @@ class ProjectApi(MethodView):
         data = request.json
         project = Project()
         project.create(data['name'],data['description'])
-        user.add_project(data['name'])
+        user.add_project(data['name'].replace(' ','_'))
         return jsonify({'status':True})
     
     def put(self,project_id):
@@ -52,6 +52,7 @@ class ProjectApi(MethodView):
 
         project = Project()
         project.get(project_id)
+        
         data = request.json
         project.description = data['description']
         project.save()
