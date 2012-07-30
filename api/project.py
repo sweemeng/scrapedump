@@ -20,11 +20,20 @@ class ProjectApi(MethodView):
             project.get(project_id)
             data = project.project.to_mongo()
         else:
+            data = {}
             project = ProjectList()
-            data = []
+            all_project = []
             for p in project.all():
-                data.append(p.project.to_mongo())
-        
+                print p.project.to_mongo()
+                all_project.append(p.project.to_mongo())
+            data['all'] = all_project
+                
+            if request.args.get('api_key'):
+                user = User()
+                user.api_login(request.args.get('api_key'))
+                user_project = user.user.project
+                data['user'] = self.get_project(user_project)
+            
         data = json.dumps(data,default=bson.json_util.default)
         resp = Response(data,status=200,mimetype='application/json')
         resp.headers['Link'] = 'http://localhost:5000'
@@ -53,10 +62,18 @@ class ProjectApi(MethodView):
         project = Project()
         project.get(project_id)
         
+        data = request.json
+        
+        if data.get('action') == 'join':
+            user.add_project(project.project.name_to_mongo())
+            return jsonify({'status':True})
+        elif data.get('action') == 'withdraw':
+            user.remove_project(project.project.name_to_mongo())
+            return jsonify({'status':True})
+            
         if not project.project.name_to_mongo() in user.user.project:
             return jsonify({'status':False})
         
-        data = request.json
         project.project.description = data['description']
         project.save()
         return jsonify({'status':True})
@@ -77,5 +94,16 @@ class ProjectApi(MethodView):
         model.delete({'_id':objectid.ObjectId(str(project_id))})
         
         return jsonify({'status':True})
+    
+    def get_project(self,name):
+        name = [i.replace('_',' ') for i in  name]
+        
+        temp = []
+        
+        for n in name:
+            project = Project()
+            project.find(n)
+            temp.append(project.project.to_mongo())
+        return temp
 
 

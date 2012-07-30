@@ -83,7 +83,7 @@ def test_project_create():
     url = '/api/project/?api_key=%s' % api_key
     # now check project in user
     test_client = webapp.app.test_client()
-    data = {'name':'project 1','description':'project content 1'}
+    data = {'name':'project create','description':'project content create'}
     
     result = test_client.post(url,data=json.dumps(data),content_type='application/json')
     status = json.loads(result.data)
@@ -91,14 +91,14 @@ def test_project_create():
     project = ProjectList()
     test_user = User()
     test_user.login('test_user','test_pass')
-    assert 'project 1'.replace(' ','_') in test_user.user.project
+    assert 'project create'.replace(' ','_') in test_user.user.project
     for i in project.all():
-        assert 'project 1' == i.project.name
+        assert 'project create' == i.project.name
     
     # now delete it
     project = Project()
     model = MongoModel(project=project.project_,collection=project.collection_)
-    model.delete({'name':'project 1'})
+    model.delete({'name':'project create'})
 
 def setup_project_delete():
     user = User()
@@ -180,13 +180,78 @@ def test_project_update():
 
 # now project created, you join or withdraw
 # you are talking about user info, so go figure
+def setup_user_project_list():
+    user = User()
+    user.create('test_user_list','test_pass','test@example.com')
+    project = Project()
+    project.create('project list 1','project content 1')
+    project = Project()
+    project.create('project list 2','project content 2')
+    project = Project()
+    project.create('project list 3','project content 3')
+    user.add_project('project_list_1')
+    user.add_project('project_list_2')
+
+def teardown_user_project_list():
+    user = User()
+    model = MongoModel(project=user.project,collection=user.collection)
+    model.delete({'username':'test_user_list'})
+    project = Project()
+    model = MongoModel(project=project.project_,collection=project.collection_)
+    model.delete({'name':'project list 1'})
+    model.delete({'name':'project list 2'})
+    model.delete({'name':'project list 3'})
+
+# do user join a project, or a project added to user?
+@with_setup(setup_user_project_list,teardown_user_project_list)
 def test_user_project_list():
-    pass
+    user = User()
+    user.login('test_user_list','test_pass')
+    api_key = user.user.auth_token
+    test_client = webapp.app.test_client()
+    data = {'action':'user_list'}
+    url = '/api/project/?api_key=%s' % api_key
+    result = test_client.get(url)
+    print result.data
+    assert 'project list 1' in result.data
+    assert 'project list 2' in result.data
 
+@with_setup(setup_user_project_list,teardown_user_project_list)
 def test_user_project_join():
-    pass
+    user = User()
+    user.login('test_user_list','test_pass')
+    api_key = user.user.auth_token
+    test_client = webapp.app.test_client()
+    project = Project()
+    project.find('project list 3')
+    
+    url = '/api/project/%s/?api_key=%s' % (project.project.id,api_key)
 
+    data = {'project':'project list 3','action':'join'}
+
+    result = test_client.put(url,data=json.dumps(data),content_type='application/json')
+    user.login('test_user_list','test_pass')
+    print user.user.project
+    assert 'project_list_3' in user.user.project
+
+@with_setup(setup_user_project_list,teardown_user_project_list)
 def test_user_project_withdraw():
-    pass
+    user = User()
+    user.login('test_user_list','test_pass') 
+    user.add_project('project_list_3')
+    api_key = user.user.auth_token
+    test_client = webapp.app.test_client()
+    project = Project()
+    project.find('project list 3')
+
+    url = '/api/project/%s/?api_key=%s' % (project.project.id,api_key)
+       
+    data = {'project':'project list 3','action':'withdraw'}
+
+    result = test_client.put(url,data=json.dumps(data),content_type='application/json')
+    print result.data 
+    user.login('test_user_list','test_pass')
+    print user.user.project
+    assert not 'project_list_3' in user.user.project
 
 
