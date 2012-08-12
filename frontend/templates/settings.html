@@ -1,17 +1,17 @@
-<html>
-    <head>
-        <title>Settings</title>
-    </head>
-    <body>
-        <div id='user_settings'>
-            <form method="POST" action="">
-                {{ form.hidden_tag() }}
-                {{ form.email.label }} {{ form.email }}
-                {{ form.password.label }} {{ form.password }}
-                {{ form.confirm.label }} {{ form.confirm }}
-                <input type="submit" value="save">
-            </form>
-            {{ user.auth_token }}
-        </div>
-    </body>
-</html>
+{% extends "base.html" %}
+{% block title %}Settings{% endblock %}
+{% block container %}
+            <div class="row">
+                <div id='user_settings' class="span4 offset4">
+                    <form method="POST" action="">
+                        {{ form.hidden_tag() }}
+                        {{ form.email.label }} {{ form.email }}
+                        {{ form.password.label }} {{ form.password }}
+                        {{ form.confirm.label }} {{ form.confirm }}
+                        <input type="submit" value="save">
+                    </form>
+                    {{ user.auth_token }}
+                </div>
+            </div>
+{% endblock %}
+
