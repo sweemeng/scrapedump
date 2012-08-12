@@ -1,0 +1,23 @@
+<html>
+    <head>
+        <title>{% block title %}{% endblock %} </title>
+        <link href-"/static/css/bootstrap.css" rel="stylesheet">
+        {% block extra_css %}{% endblock %}
+    </head>
+    <body>
+        <div class="navbar navbar-fixed-top">
+            <div class="navbar-inner">
+                <div class="container">
+                    <a class="brand" href="#">ScrapeDump</a>
+                    {% block top_bar %}{% endblock %}
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            {% block container %}
+            {% endblock %}
+        </div>
+        <script src="/static/js/jquery.js"></script>
+        {% block extra_js %}{% endblock %}
+    </body>
+</html>

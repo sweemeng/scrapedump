@@ -1,13 +1,14 @@
-<html>
-	<head>
-		<title>Login</title>
-	</head>
-	<body>
-		<form method="POST" action="">
-			{{ form.hidden_tag() }}
-			{{ form.username.label }} {{ form.username }}
-			{{ form.password.label }} {{ form.password }}
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+{% block container %}
+            <div class="row">
+                <div class="span4 offset4">
+                    <form method="POST" action="">
+                        {{ form.hidden_tag() }}
+                        {{ form.username.label }} {{ form.username }}
+                        {{ form.password.label }} {{ form.password }}
                         <input type="submit" value="login">
-		</form>
-	</body>
-</html>
+                    </form>
+                </div>
+            </div>
+{% endblock %}
