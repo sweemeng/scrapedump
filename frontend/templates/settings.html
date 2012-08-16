@@ -3,12 +3,13 @@
 {% block container %}
             <div class="row">
                 <div id='user_settings' class="span4 offset4">
-                    <form method="POST" action="">
+                    <form method="POST" action="" class="well">
                         {{ form.hidden_tag() }}
                         {{ form.email.label }} {{ form.email }}
                         {{ form.password.label }} {{ form.password }}
                         {{ form.confirm.label }} {{ form.confirm }}
-                        <input type="submit" value="save">
+                        <br>
+                        <button class="btn" type="submit">Save</button>
                     </form>
                     {{ user.auth_token }}
                 </div>
