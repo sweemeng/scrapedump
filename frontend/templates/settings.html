@@ -3,13 +3,29 @@
 {% block container %}
             <div class="row">
                 <div id='user_settings' class="span4 offset4">
-                    <form method="POST" action="" class="well">
+                    <form method="POST" action="" class="form-horizontal">
+                        <fieldset>
                         {{ form.hidden_tag() }}
-                        {{ form.email.label }} {{ form.email }}
-                        {{ form.password.label }} {{ form.password }}
-                        {{ form.confirm.label }} {{ form.confirm }}
-                        <br>
+                        <div class="control-group">
+                        <label class="control-label" for="{{form.email.id}}">{{form.email.label.text}}</label>
+                        <div class="controls">
+                            <input type="text" class="input-xlarge" name="{{form.email.name}}" id="{{form.email.id}}" value="{{form.email.id}}">
+                        </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label" for="{{form.password.id}}">{{form.password.label.text}}</label>
+                        <div class="controls">
+                            <input type="password" class="input-xlarge" name="{{form.password.name}}" id="{{form.password.id}}">
+                        </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label" for="{{form.confirm.id}}">{{form.confirm.label.text}}</label>
+                        <div class="controls">
+                            <input type="password" class="input-xlarge" name="{{form.confirm.name}}" id="{{form.confirm.id}}">
+                        </div>
+                        </div>                       
                         <button class="btn" type="submit">Save</button>
+                        </fieldset>
                     </form>
                     {{ user.auth_token }}
                 </div>

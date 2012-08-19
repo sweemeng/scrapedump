@@ -3,12 +3,29 @@
 {% block container %}
             <div class="row">
                 <div class="span4 offset4">
-                    <form class="well" method="POST" action="">
-                        {{ form.hidden_tag() }}
-                        {{ form.username.label }} {{ form.username }}
-                        {{ form.password.label }} {{ form.password }}
-                        <br/> 
-                        <button type="submit" class="btn" >Submit</button>
+                    <form class="form-horizontal" method="POST" action="">
+                        <fieldset>
+                            {{ form.hidden_tag() }}
+                            <div class="control-group">
+                                <label class="control-label" for="{{form.username.id}}">{{form.username.label.text}}</label>
+                                <div class="controls">
+                                {% if form.username.data %}
+                                <input type="text" id="{{form.username.id}}" class="input-xlarge" name="{{form.username.name}}" value="{{form.username.data}}">
+                                {% else %}
+                                <input type="text" class="input-xlarge" id="{{form.username.id}}" name="{{form.username.name}}" value="">
+                                {% endif %}
+                                </div>
+                            </div>
+                            <div class="control-group">
+                                <label class="control-label" for="{{form.password.id}}">{{form.password.label.text}}</label>
+                                <div class="controls">
+                                <input type="password" class="input-xlarge" id="{{form.password.id}}" class="input-xlarge" name="{{form.password.name}}">
+                                </div>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn">Login</button>
+                            </div>
+                        </fieldset>
                     </form>
                 </div>
             </div>

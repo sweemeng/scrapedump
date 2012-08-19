@@ -3,14 +3,47 @@
 {% block container %}
             <div class="row">
                 <div id='user_settings' class="span4 offset4">
-                    <form method="POST" action="" class="well">
+                    <form method="POST" action="" class="form-horizontal">
                         {{ form.hidden_tag() }}
-                        {{ form.username.label }} {{ form.username }}
-                        {{ form.email.label }} {{ form.email }}
-                        {{ form.password.label }} {{ form.password }}
-                        {{ form.confirm.label }} {{ form.confirm }}
-                        <br/>
-                        <button class="btn" type="submit">Submit</button>
+                        <fieldset>
+                        <div class="control-group">
+                        <label class="control-label" for="{{form.username.id}}">{{form.username.label.text}}</label>
+                            <div class="controls">
+                            {% if form.username.data %}
+                                <input class="input-xlarge" type="text" id="{{form.username.id}}" name="{{form.username.name}}" value="{{form.username.data}}">
+                            {% else %}
+                                <input class="input-xlarge" type="text" id="{{form.username.id}}" name="{{form.username.name}}" value="">
+                            {% endif %}
+                            </div>
+                        </div>
+                        <div class="control-group">
+                        <label class="control-label" for="{{form.email.id}}">{{form.email.label.text}}</label>
+                            <div class="controls">
+                            {% if form.email.data %}
+                                <input class="input-xlarge" type="text" id="{{form.email.id}}" name="{{form.email.name}}" value="{{form.email.data}}">
+                            {% else %}
+                                <input class="input-xlarge" type="text" id="{{form.email.id}}" name="{{form.email.name}}" value="">
+                            {% endif %}
+                            </div>
+                        </div>
+                        <div class="control-group">
+                        <label class="control-label" for="{{form.password.id}}">{{form.password.label.text}}</label>
+                            <div class="controls">
+                                <input class="input-xlarge" type="password" id="{{form.password.id}}" name="{{form.password.name}}">
+                            </div>
+                        </div>
+                        <div class="control-group">
+                        <label class="control-label" for="{{form.confirm.id}}">{{form.confirm.label.text}}</label>
+                            <div class="controls">
+                                <input class="input-xlarge" type="password" id="{{form.confirm.id}}" name="{{form.confirm.name}}">
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <div class="controls">
+                            <button class="btn" type="submit">Submit</button>
+                            </div>
+                        </div>
+                        </fieldset>
                     </form>
                 </div>
             </div>
