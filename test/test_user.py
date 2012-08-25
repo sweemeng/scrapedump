@@ -24,6 +24,14 @@ def test_empty_user():
     assert test_data.has_key('auth_token')
     assert test_data.has_key('email')
 
+def setup_test_create_user():
+    pass
+
+def teardown_test_create_user():
+    db = MongoModel(project='internal',collection='user')
+    db.delete({'username':'test_user_create'})
+
+@with_setup(setup_test_create_user,teardown_test_create_user)
 def test_create_user():
     user = model.User()
     test_username = 'test_user_create'

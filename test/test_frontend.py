@@ -3,6 +3,7 @@ from nose.tools import with_setup
 from user.model import User 
 from mongomodel.model import MongoModel
 
+# create test for project view
 def setup_login():
     user = User()
     user.create('test_user','test_password','test@example.com')
@@ -71,7 +72,7 @@ def teardown_user_settings_email():
     user.login('test_user_email','test_password')
 
     db = MongoModel(project=user.project,collection=user.collection)
-    db.delete({'_id':user.user.id})
+    db.delete({'username':'test_user_email'})
      
 @with_setup(setup_user_settings_email,teardown_user_settings_email)
 def test_user_settings_email():
@@ -103,7 +104,16 @@ def test_user_settings_email():
     db = MongoModel(project=user.project,collection=user.collection)
     db.delete({'_id':user.user.id})
 
+def setup_register():
+    pass
 
+def teardown_register():
+    user = User()
+    user.login('test_register','test_password')
+    db = MongoModel(project=user.project,collection=user.collection)
+    db.delete({'username':'test_register'})
+
+@with_setup(setup_register,teardown_register)
 def test_user_registration():
     username = 'test_register'
     password = 'test_password'
