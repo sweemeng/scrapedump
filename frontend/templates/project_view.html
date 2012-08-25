@@ -12,7 +12,9 @@
     <div id="detail" class="tab-pane fade {% if not edit %}in active{% endif %}">
         <address>
         <strong>{{ project.project.name }}</strong><br>
-        API: {{ project.get_api()}}<br>
+        Api:<br>
+        {% for api in project.get_api() %}<br>
+        {% endfor %}
         </address>
     </div>
 
