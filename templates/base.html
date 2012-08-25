@@ -16,6 +16,26 @@
             <div class="navbar-inner">
                 <div class="container">
                     <a class="brand" href="#">ScrapeDump</a>
+                    <ul class="nav pull-right">
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                {% if current_user.is_authenticated() %}
+                                    {{ current_user.user.username }}
+                                {% else %}
+                                    Annonymous
+                                {% endif %}
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li>
+                                {% if current_user.is_authenticated %}
+                                     <a href="/settings/">User Settings</a>
+                                {% else %}
+                                     <a href="/register/">Register</a>
+                                {% endif %}
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
                     {% block top_bar %}{% endblock %}
                 </div>
             </div>
@@ -25,6 +45,7 @@
             {% endblock %}
         </div>
         <script src="/static/js/jquery.js"></script>
+        <script src="/static/js/bootstrap-dropdown.js"></script>
         {% block extra_js %}{% endblock %}
     </body>
 </html>
