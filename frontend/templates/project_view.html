@@ -13,9 +13,22 @@
         <address>
         <strong>{{ project.project.name }}</strong><br>
         Api:<br>
-        {% for api in project.get_api() %}<br>
+        {% for api in project.get_api() %}
+            {{ api }}<br>
         {% endfor %}
         </address>
+        <table class="table table-condenced">
+            <tr>
+                <th>Entry</th>
+                <th>Counts</th>
+            <tr>
+            {% for stats in project.get_stats() %}
+            <tr>
+                <td>{{ stats.0 }}</td>
+                <td>{{ stats.1 }}</td>
+            </tr>
+            {% endfor %}
+        </table>
     </div>
 
     <div id="edit" class="tab-pane fade {% if edit %}in active{% endif %}">

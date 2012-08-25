@@ -44,6 +44,7 @@ def project_view(project_name):
     return render_template('project_view.html',project=project,form=form,edit=edit)
 
 @frontend.route('/project/',methods=['POST','GET'])
+@login_required
 def project_create():
     form = ProjectForm(csrf_enabled=False)
     print "processing form"

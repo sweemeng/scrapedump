@@ -59,6 +59,13 @@ class Project(object):
             if entry not in self.project.entries:
                 self.create_entries(entry)
         return [model.MongoModel(self.project.name_to_mongo(),entry) for entry in self.project.entries]
+    
+    def get_stats(self):
+        temp = []
+        for entry in self.project.entries:
+            mongo_model = model.MongoModel(project=self.to_mongo_name(),collection=entry)
+            temp.append(entry,mongo_model.entries.count())
+        return temp
 
 
 class ProjectList(object):
