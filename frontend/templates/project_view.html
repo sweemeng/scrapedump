@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Project {% endblock %}
+{% block extra_header %}
+
+{% endblock %}
+{% block container %}
+<ul class="nav nav-tabs" id="project_tabs">
+    <li {% if not edit %}class="active"{% endif %}><a href="#detail" data-toggle="tabs">Detail</a></li>
+    <li {% if edit %} class="active" {% endif %}><a href="#edit" data-toggle="tabs">Edit</a></li>
+</ul>
+<div id="project_tabs_content" class="tab-content">
+    <div id="detail" class="tab-pane fade {% if not edit %}in active{% endif %}">
+        <address>
+        <strong>{{ project.project.name }}</strong><br>
+        API: {{ project.get_api()}}<br>
+        </address>
+    </div>
+
+    <div id="edit" class="tab-pane fade {% if edit %}in active{% endif %}">
+        <form class="form-horizontal" method="POST" action="">
+            <div class="control-group">
+                <label class="control-label" for="{{ form.description.id }}">Description :</label>
+                <div class="controls">
+                    <textarea name="{{ form.description.name }}" id="{{ form.description.id}}">
+                        {{ project.project.description }}
+                    </textarea>
+                </div>
+                <div class="controls">
+                    <button type="submit" class="btn">Save</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="/static/js/bootstrap-tab.js"></script>
+<script src="/static/js/bootstrap-scrollspy.js"></script>
+<script>
+    $(function(){
+        $('#project_tabs a').click(function(e){
+            e.preventDefault();
+            $(this).tab('show');
+        });
+    });
+</script>
+{% endblock %}
