@@ -1,8 +1,17 @@
-<html>
-    <head>
-        <title>Main Page</title>
-    </head>
-    <body>
-        <div id="User">Welcome {{ username }}</div>
-    </body>
-</html>
+{% extends "base.html" %}
+{% block title %}Main Page{% endblock %}
+{% block container %}
+
+        <table class="table table-condensed">
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+            </tr>
+        {% for project in projects %}
+            <tr>
+            <td><a href="{{project.get_url()}}">{{ project.project.name }}</a></td>
+            <td>{{project.project.description}}</td>
+            </tr>
+        {% endfor %}
+        </table>
+{% endblock %}
