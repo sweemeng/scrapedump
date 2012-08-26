@@ -6,17 +6,26 @@
 {% block container %}
 <ul class="nav nav-tabs" id="project_tabs">
     <li {% if not edit %}class="active"{% endif %}><a href="#detail" data-toggle="tabs">Detail</a></li>
+    <li><a href="#usage" data-toggle="tabs">Usage</a></li>
     <li {% if edit %} class="active" {% endif %}><a href="#edit" data-toggle="tabs">Edit</a></li>
 </ul>
 <div id="project_tabs_content" class="tab-content">
     <div id="detail" class="tab-pane fade {% if not edit %}in active{% endif %}">
+        <div class="page-header"><h3>{{ project.project.name}}</h3></div>
+        <section>
+        <div class="well">
         <address>
-        <strong>{{ project.project.name }}</strong><br>
-        Api:<br>
+        <strong>Api Endpoint:<br></strong>
+        <ul>
         {% for api in project.get_api() %}
-            {{ api }}<br>
+            <li>{{ api }}</li>
         {% endfor %}
+        </ul>
         </address>
+        </div>
+        </section>
+        <section>
+        <h4>Data Statistics</h4>
         <table class="table table-condenced">
             <tr>
                 <th>Entry</th>
@@ -29,8 +38,64 @@
             </tr>
             {% endfor %}
         </table>
+        </section>
     </div>
-
+    <div id="usage" class="tab-page fade">
+        <div class="page-header"><h3>API Usage</h3></div>
+        <section>
+            <h5>Get</h5>
+            <p>
+                <p>List All Data</p>
+                <div class="well">
+                    {% for api in project.get_api() %}
+                        GET {{api}}
+                    {% endfor %}
+                </div>
+            </p>
+            <p>
+                <p>Get Single Item</p>
+                <div class="well">
+                    {% for api in project.get_api() %}
+                        GET {{api}}&lt;id&gt;/
+                    {% endfor %}
+                </div>
+            </p>
+        </section> 
+        <section>
+            <h5>Create</h5>
+            <p>
+                <p> To create, POST a json data </p>
+                <div class="well">
+                    {% for api in project.get_api() %}
+                        POST {{api}}
+                    {% endfor %}
+                </div>
+            </p>
+        </section>
+        <section>
+            <h5>Update</h5>
+            <p> 
+                <p>To update, PUT a json data to an id</p>        
+                <div class="well">
+                    {% for api in project.get_api() %}
+                        PUT {{api}}&lt;id&gt;/
+                    {% endfor %}
+                </div>
+            </p>
+        </section>
+        <section>
+            <h5>Delete</h5>
+            <p>To delete, DELETE on a endpoint</p>
+            <p>
+                <div class="well">
+                    {% for api in project.get_api() %}
+                    DELETE {{api}}&lt;id&gt;/
+                    {% endfor %}
+                </div>
+            </p>
+        </section>
+         
+    </div>
     <div id="edit" class="tab-pane fade {% if edit %}in active{% endif %}">
         <form class="form-horizontal" method="POST" action="">
             <div class="control-group">
