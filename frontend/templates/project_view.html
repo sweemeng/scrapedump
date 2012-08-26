@@ -10,18 +10,11 @@
     <li {% if edit %} class="active" {% endif %}><a href="#edit" data-toggle="tabs">Edit</a></li>
 </ul>
 <div id="project_tabs_content" class="tab-content">
-    <div id="detail" class="tab-pane fade {% if not edit %}in active{% endif %}">
+    <div id="detail" class="tab-pane fade{% if not edit %} in active{% endif %}">
         <div class="page-header"><h3>{{ project.project.name}}</h3></div>
         <section>
         <div class="well">
-        <address>
-        <strong>Api Endpoint:<br></strong>
-        <ul>
-        {% for api in project.get_api() %}
-            <li>{{ api }}</li>
-        {% endfor %}
-        </ul>
-        </address>
+            {{ project.project.description }}
         </div>
         </section>
         <section>
@@ -30,17 +23,19 @@
             <tr>
                 <th>Entry</th>
                 <th>Counts</th>
+                <th>Data Dump</th>
             <tr>
             {% for stats in project.get_stats() %}
             <tr>
                 <td>{{ stats.0 }}</td>
                 <td>{{ stats.1 }}</td>
+                <td><a href="/api/db/{{project.project.name_to_mongo()}}/{{stats.0}}/">Raw Dump</a></td>
             </tr>
             {% endfor %}
         </table>
         </section>
     </div>
-    <div id="usage" class="tab-page fade">
+    <div id="usage" class="tab-pane fade">
         <div class="page-header"><h3>API Usage</h3></div>
         <section>
             <h5>Get</h5>
@@ -96,7 +91,7 @@
         </section>
          
     </div>
-    <div id="edit" class="tab-pane fade {% if edit %}in active{% endif %}">
+    <div id="edit" class="tab-pane fade{% if edit %} in active{% endif %}">
         <form class="form-horizontal" method="POST" action="">
             <div class="control-group">
                 <label class="control-label" for="{{ form.description.id }}">Description :</label>
@@ -110,13 +105,17 @@
                 <label class="control-label" for="{{ form.entry.id}}">{{form.entry.label.text}}:</label>
                 <div class="controls">
                     <input type="text" name="{{ form.entry.name }}" id="{{ form.entry.id }}" class="input-xlarge">
-                </div> 
-                {% for e in project.project.entries %}
+                </div>  
+            </div>
+           
+            {% for e in project.project.entries %}
+            <div class="control-group">
                 <div class="controls">
                     <span class="input-xlarge uneditable-input">{{e}}</span>
                 </div>
-                {% endfor %}
-
+            </div>
+            {% endfor %}
+            <div class="control-group">
                 <div class="controls">
                     <button type="submit" class="btn">Save</button>
                 </div>

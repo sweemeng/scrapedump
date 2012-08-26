@@ -49,8 +49,9 @@ class Project(object):
 
     def add_entries(self,name):
         if name not in self.project.entries:
-            self.project.entries.append(name)
-            self.save()
+            if name and not " " in name:
+                self.project.entries.append(name)
+                self.save()
     
     def get_db(self):
         mongo_model = model.MongoModel(project=self.to_mongo_name())
