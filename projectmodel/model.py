@@ -64,7 +64,7 @@ class Project(object):
         temp = []
         for entry in self.project.entries:
             mongo_model = model.MongoModel(project=self.to_mongo_name(),collection=entry)
-            temp.append(entry,mongo_model.entries.count())
+            temp.append((entry,mongo_model.entries.count()))
         return temp
 
 

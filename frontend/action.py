@@ -5,6 +5,7 @@ from flask import redirect
 from flask import request
 from flask.ext.login import login_required
 from flask.ext.login import current_user
+from flask.ext.wtf import TextField
 
 from user.model import User
 from forms.user import UserForm
@@ -34,6 +35,7 @@ def project_view(project_name):
     form = ProjectUpdateForm(csrf_enabled=False)
     project = Project()
     project.find(project_name.replace('_',' '))
+    entries = project.project.entries
     edit = False
     if request.method == 'POST':
         edit = True
@@ -41,6 +43,9 @@ def project_view(project_name):
             # name is not edited because it bind to the database name
             project.project.description = form.description.data
             project.save()
+            project.add_entries(form.entry.data)
+            entries = project.project.entries
+
     return render_template('project_view.html',project=project,form=form,edit=edit)
 
 @frontend.route('/project/',methods=['POST','GET'])
@@ -52,8 +57,10 @@ def project_create():
         print 'form submitted'
         project = Project()
         project.create(form.name.data,form.description.data)
+        print form.entry
+        project.add_entries(form.entry.data)
         return redirect('/project/%s/'% project.to_mongo_name())
-
+    
     return render_template('project_create.html',form=form)
 
 @frontend.route('/settings/',methods=['POST','GET'])

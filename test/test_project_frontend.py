@@ -8,6 +8,7 @@ from mongomodel.model import MongoModel
 def setup_project_view():
     project = Project()
     project.create('project view','test project view')
+    project.add_entries('data')
 
 def teardown_project_view():
     db = MongoModel(project='internal',collection='project')
@@ -21,14 +22,15 @@ def test_project_view():
     
     result = test_client.get('/project/project_view/')
     assert 'project view' in result.data
+    assert 'data' in result.data
 
 def setup_project_create():
     user = User()
-    user.create('test_user','test_password','test@example.com')
+    user.create('test_create_user','test_password','test@example.com')
 
 def teardown_project_create():
     user = User()
-    user.login('test_user','test_password')
+    user.login('test_create_user','test_password')
     db = MongoModel(project=user.project,collection=user.collection)
     db.delete({'_id':user.user.id})
     db = MongoModel(project='internal',collection='project')
@@ -38,16 +40,18 @@ def teardown_project_create():
 def test_project_create():
     test_client = webapp.app.test_client()
     result = test_client.post('/login/',data={
-        'username':'test_user',
+        'username':'test_create_user',
         'password':'test_password'
     },follow_redirects=True)
     
     project_ui = test_client.post('/project/',data={
         'name':'project create',
-        'description':'project create'
+        'description':'project create',
+        'entry':'data'
     },follow_redirects=True) 
-    
+    print project_ui.data    
     assert 'project create' in project_ui.data
+    assert 'data' in project_ui.data
 
 
 def setup_project_update():
@@ -55,6 +59,7 @@ def setup_project_update():
     user.create('test_update_user','test_password','test@example.com')
     project = Project()
     project.create('project update','test project update')
+    project.add_entries('data')
 
 def teardown_project_update():
     user = User()
@@ -73,8 +78,10 @@ def test_project_update():
     },follow_redirects=True)
     
     project_ui = test_client.post('/project/project_update/',data={
-        'description':'project updated'
+        'description':'project updated',
+        'entry':'newdata'
     },follow_redirects=True) 
     
     assert 'project updated' in project_ui.data
+    assert 'newdata' in project_ui.data
 

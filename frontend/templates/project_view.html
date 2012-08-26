@@ -40,6 +40,18 @@
                         {{ project.project.description }}
                     </textarea>
                 </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="{{ form.entry.id}}">{{form.entry.label.text}}:</label>
+                <div class="controls">
+                    <input type="text" name="{{ form.entry.name }}" id="{{ form.entry.id }}" class="input-xlarge">
+                </div> 
+                {% for e in project.project.entries %}
+                <div class="controls">
+                    <span class="input-xlarge uneditable-input">{{e}}</span>
+                </div>
+                {% endfor %}
+
                 <div class="controls">
                     <button type="submit" class="btn">Save</button>
                 </div>
