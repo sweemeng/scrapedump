@@ -26,13 +26,14 @@
                                 {% endif %}
                             </a>
                             <ul class="dropdown-menu">
-                                <li>
-                                {% if current_user.is_authenticated %}
-                                     <a href="/settings/">User Settings</a>
+                                
+                                {% if current_user.is_authenticated() %}
+                                     <li><a href="/settings/">User Settings</a></li>
                                 {% else %}
-                                     <a href="/register/">Register</a>
+                                     <li><a href="/login/">Login</a></li>
+                                     <li><a href="/register/">Register</a></li>
                                 {% endif %}
-                                </li>
+                                
                             </ul>
                         </li>
                     </ul>

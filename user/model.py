@@ -57,7 +57,8 @@ class User(object):
 
     def get(self,id):
         temp = self.model.query({'_id':ObjectId(str(id))})
-        self.user.from_mongo(temp)
+        if temp:
+            self.user.from_mongo(temp)
         return self
     
     def get_auth_token(self):

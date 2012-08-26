@@ -1,11 +1,13 @@
 {% extends "base.html" %}
 {% block title %}Main Page{% endblock %}
 {% block container %}
+        {% if current_user.is_authenticated() %}
         <ul class="nav nav-pills">
             <li class="active">
                 <a href="/project/">Create Project</a>
             </li>
         </ul>
+        {% endif %}
         <table class="table table-condensed">
             <tr>
                 <th>Name</th>
