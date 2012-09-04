@@ -16,7 +16,8 @@ class Project(object):
         api_list = []
         name = self.to_mongo_name()
         for entry in self.project.entries:
-            api_list.append('/api/db/%s/%s/' % (name,entry))
+            if entry != 'system.indexes':
+                api_list.append('/api/db/%s/%s/' % (name,entry))
         return api_list 
     
     def get_url(self):
@@ -57,15 +58,17 @@ class Project(object):
         mongo_model = model.MongoModel(project=self.to_mongo_name())
         temp_entries = mongo_model.db.collection_names()
         for entry in temp_entries:
-            if entry not in self.project.entries:
-                self.create_entries(entry)
+            if entry != 'system.indexes':
+                if entry not in self.project.entries:
+                    self.create_entries(entry)
         return [model.MongoModel(self.project.name_to_mongo(),entry) for entry in self.project.entries]
     
     def get_stats(self):
         temp = []
         for entry in self.project.entries:
-            mongo_model = model.MongoModel(project=self.to_mongo_name(),collection=entry)
-            temp.append((entry,mongo_model.entries.count()))
+            if entry != 'system.indexes':
+                mongo_model = model.MongoModel(project=self.to_mongo_name(),collection=entry)
+                temp.append((entry,mongo_model.entries.count()))
         return temp
 
 

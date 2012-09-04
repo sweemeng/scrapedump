@@ -24,10 +24,16 @@
                             <input type="password" class="input-xlarge" name="{{form.confirm.name}}" id="{{form.confirm.id}}">
                         </div>
                         </div>                       
+                        <div class="control-group">
+                            <label class="control-label" for="api_key">Api Key</label>
+                        <div class="controls">
+                            <span class="input-xlarge uneditable-input">{{ user.auth_token }}</span>
+                        </div>
+                        </div>                       
+
                         <button class="btn" type="submit">Save</button>
                         </fieldset>
                     </form>
-                    {{ user.auth_token }}
                 </div>
             </div>
 {% endblock %}

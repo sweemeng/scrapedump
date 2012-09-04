@@ -46,7 +46,7 @@
                 <p>List All Data</p>
                 <div class="well">
                     {% for api in project.get_api() %}
-                        GET {{api}}
+                        <p>GET {{api}}</p>
                     {% endfor %}
                 </div>
             </p>
@@ -54,7 +54,7 @@
                 <p>Get Single Item</p>
                 <div class="well">
                     {% for api in project.get_api() %}
-                        GET {{api}}&lt;id&gt;/
+                        <p>GET {{api}}&lt;id&gt;/</p>
                     {% endfor %}
                 </div>
             </p>
@@ -65,7 +65,11 @@
                 <p> To create, POST a json data </p>
                 <div class="well">
                     {% for api in project.get_api() %}
-                        POST {{api}}?api_key=&lt;api_key&gt;
+                        {% if current_user.is_authenticated() %}
+                        <p>POST {{api}}?api_key={{current_user.user.auth_token}}</p>
+                        {% else %}
+                        <p>POST {{api}}?api_key=&lt;api_key&gt;</p>
+                        {% endif %}
                     {% endfor %}
                 </div>
             </p>
@@ -76,7 +80,13 @@
                 <p>To update, PUT a json data to an id</p>        
                 <div class="well">
                     {% for api in project.get_api() %}
-                        PUT {{api}}&lt;id&gt;/?api_key=&lt;api_key&gt;
+                        {% if current_user.is_authenticated() %}
+
+                        <p>PUT {{api}}&lt;id&gt;/?api_key={{current_user.user.auth_token}}</p>
+
+                        {% else %}
+                        <p>PUT {{api}}&lt;id&gt;/?api_key=&lt;api_key&gt;</p>
+                        {% endif %}
                     {% endfor %}
                 </div>
             </p>
@@ -87,7 +97,12 @@
             <p>
                 <div class="well">
                     {% for api in project.get_api() %}
-                    DELETE {{api}}&lt;id&gt;/?api_key=&lt;api_key&gt;
+                    {% if current_user.is_authenticated() %}
+                    <p>DELETE {{api}}&lt;id&gt;/?api_key={{ current_user.user.auth_token}}</p>
+                       
+                    {% else %}
+                    <p>DELETE {{api}}&lt;id&gt;/?api_key=&lt;api_key&gt;</p>
+                    {% endif %}
                     {% endfor %}
                 </div>
             </p>

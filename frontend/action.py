@@ -59,6 +59,8 @@ def project_create():
         project.create(form.name.data,form.description.data)
         print form.entry
         project.add_entries(form.entry.data)
+        user = current_user
+        user.add_project(project.project.name_to_mongo())
         return redirect('/project/%s/'% project.to_mongo_name())
     
     return render_template('project_create.html',form=form)
