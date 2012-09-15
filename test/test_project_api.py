@@ -101,9 +101,12 @@ def test_project_create():
     test_user = User()
     test_user.login('test_user','test_pass')
     assert 'project create'.replace(' ','_') in test_user.user.project
+    exist = False
     for i in project.all():
-        print i.project.name
-        assert 'project create' == i.project.name
+        
+        if 'project create' == i.project.name:
+            exist = True
+    assert exist
     
     # now delete it
     project = Project()

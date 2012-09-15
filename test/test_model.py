@@ -77,3 +77,12 @@ def test_update():
     data = model.query({'a':1})
     assert data['b'] == 3
 
+@with_setup(setup_test_update,teardown_test_update)
+def test_update_add():
+    model = MongoModel()
+    model.update({'a':1},{'c':3})
+    data = model.query({'a':1})
+    print data
+    assert 'c' in data
+    assert data['c'] == 3
+    

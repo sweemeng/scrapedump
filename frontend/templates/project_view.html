@@ -25,12 +25,14 @@
                 <th>Counts</th>
                 <th>Data Dump</th>
             <tr>
-            {% for stats in project.get_stats() %}
+            {% for key,value in project.get_stats().items() %}
+            {% if value.entry != "system.indexes" %}
             <tr>
-                <td>{{ stats.0 }}</td>
-                <td>{{ stats.1 }}</td>
-                <td><a href="/api/db/{{project.project.name_to_mongo()}}/{{stats.0}}/">Raw Dump</a></td>
+                <td>{{ value.entry }}</td>
+                <td>{{ value.count }}</td>
+                <td><a href="/api/db/{{project.project.name_to_mongo()}}/{{value.entry}}/">Raw Dump</a></td>
             </tr>
+            {% endif %}
             {% endfor %}
         </table>
         </section>

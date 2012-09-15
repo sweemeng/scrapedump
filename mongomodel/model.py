@@ -23,7 +23,9 @@ class MongoModel(object):
         return self.entries.insert(data)
 
     def update(self,param,data):
-        self.entries.update(param,{'$set':data})
+        for d in data:
+            temp={d:data[d]}
+            self.entries.update(param,{'$set':temp})
 
     def delete(self,param):
         self.entries.remove(param)

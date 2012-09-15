@@ -41,6 +41,7 @@ def test_get():
     client = webapp.app.test_client()
 
     data = mongo.all()
+
     id = str(data[0]['_id'])
     response = client.get('/api/db/scraped/entry/%s/' % (id))
     result = json.loads(response.data)
@@ -111,7 +112,6 @@ def test_update():
 def test_delete():
     user = User()
     user.login('test_user','test_pass')
-    print user.user.project
     api_key = user.user.auth_token
     mongo = MongoModel(project='scraped',collection='entry')
     client = webapp.app.test_client()
@@ -124,7 +124,6 @@ def test_delete():
     response = client.delete(url)
 
     status = json.loads(response.data)
-    print response.data
     assert status['status']
     
     check = mongo.query({'_id':objectid.ObjectId(id)})

@@ -28,12 +28,13 @@ class DataApi(MethodView):
     def post(self,project,entry):
         api_key = request.args.get('api_key')
         user = User()
+        
         user.api_login(api_key)
         if not user.is_authenticated():
-            return jsonify({'status':False})
+            return jsonify({'status':False,'message':'user is not authenticated'})
 
         if project not in user.user.project:
-            return jsonify({'status':False})
+            return jsonify({'status':False,'message':'user don nott have access to project'})
 
         model = MongoModel(project=project,collection=entry)
         model.insert(request.json)

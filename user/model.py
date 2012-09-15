@@ -126,4 +126,5 @@ class UserTemplate(object):
             if key == '_id':
                 setattr(self,'id',str(data['_id']))
                 continue
+            
             setattr(self,key,data[key])

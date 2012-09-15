@@ -72,7 +72,7 @@ def test_project_entries():
     
     db = MongoModel(project='internal',collection='project')
     temp = db.query({'name':'test project entries'})
-    assert 'test_entries' in temp['entries'] 
+    assert 'test_entries' in temp['stats'] 
 
 # now also each project need to actually linked to a real db
 def setup_test_project_db():
