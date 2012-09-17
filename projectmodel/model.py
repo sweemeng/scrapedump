@@ -137,6 +137,7 @@ class ProjectTemplate(object):
         self.stats_template = {
                 'entry':'',
                 'count':0,
+                'old_count':0,
                 'output_count':0,
                 'output_file':[],
                 'task_id':'',
