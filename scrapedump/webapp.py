@@ -70,6 +70,10 @@ app.add_url_rule('/api/db/<project>/<entry>/<entry_id>/',
 app.register_blueprint(frontend,url_prefix='')
 
 
-if __name__ == '__main__':
+def run():
     app.debug = True
     app.run()
+
+if __name__ == '__main__':
+    print "BOOM"
+    run()

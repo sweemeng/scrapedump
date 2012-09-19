@@ -14,11 +14,12 @@ setup(
         'pymongo',
         'flask',
         'flask-login',
-        'flask-wtform',
+        'flask-wtf',
         'gunicorn',
         'ipython',
         'simplejson',
         'wsgiref',
         'nose',
+        'py-bcrypt',
         ],
 )
