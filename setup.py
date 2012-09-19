@@ -14,6 +14,7 @@ setup(
         'pymongo',
         'flask',
         'flask-login',
+        'flask-wtform',
         'gunicorn',
         'ipython',
         'simplejson',
