@@ -1,8 +1,8 @@
 import webapp
 from nose.tools import with_setup
 from user.model import User
-from projectmodel.model import Project
-from projectmodel.model import ProjectList
+from project.model import Project
+from project.model import ProjectList
 from mongomodel.model import MongoModel
 
 def setup_project_view():

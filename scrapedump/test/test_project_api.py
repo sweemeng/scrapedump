@@ -1,7 +1,7 @@
 import webapp
 from user.model import User
-from projectmodel.model import Project
-from projectmodel.model import ProjectList
+from project.model import Project
+from project.model import ProjectList
 from mongomodel.model import MongoModel
 from nose.tools import with_setup
 import json

@@ -12,8 +12,8 @@ from forms.user import UserForm
 from forms.user import UserUpdateForm
 from forms.project import ProjectForm
 from forms.project import ProjectUpdateForm
-from projectmodel.model import Project
-from projectmodel.model import ProjectList
+from project.model import Project
+from project.model import ProjectList
 
 
 frontend = Blueprint('frontend',__name__,

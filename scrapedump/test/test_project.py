@@ -1,6 +1,6 @@
 from nose.tools import with_setup
-from projectmodel.model import Project
-from projectmodel.model import ProjectTemplate
+from project.model import Project
+from project.model import ProjectTemplate
 from mongomodel.model import MongoModel 
 
 # add test for project

@@ -1,8 +1,8 @@
 from flask.views import MethodView
 from flask import jsonify
 
-from projectmodel.model import Project
-from projectmodel.model import ProjectList
+from model import Project
+from model import ProjectList
 from mongomodel.model import MongoModel
 from user.model import User
 import bson
