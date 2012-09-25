@@ -71,16 +71,17 @@ def teardown_user():
     user = User()
     user.login('test_user','test_pass')
     model = MongoModel(project=user.project,collection=user.collection)
-    model.delete({'_id':objectid.ObjectId(str(user.user.id))})
+    model.delete({'username':'test_user'})
 
 # Now anything that need to update db will need to
 def setup_test_project_create():
-    pass
+    setup_user()
 
 def teardown_test_project_create():
     project = Project()
     model = MongoModel(project=project.project_,collection=project.collection_)
     model.delete({'name':'project create'})
+    teardown_user()
 
 @with_setup(setup_test_project_create,teardown_test_project_create)
 def test_project_create():
@@ -100,6 +101,7 @@ def test_project_create():
     project = ProjectList()
     test_user = User()
     test_user.login('test_user','test_pass')
+    print test_user.user.project
     assert 'project create'.replace(' ','_') in test_user.user.project
     exist = False
     for i in project.all():

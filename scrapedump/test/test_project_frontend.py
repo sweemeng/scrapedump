@@ -32,7 +32,7 @@ def teardown_project_create():
     user = User()
     user.login('test_create_user','test_password')
     db = MongoModel(project=user.project,collection=user.collection)
-    db.delete({'_id':user.user.id})
+    db.delete({'username':'test_create_user'})
     db = MongoModel(project='internal',collection='project')
     db.delete({'name':'project create'})
 
@@ -65,7 +65,7 @@ def teardown_project_update():
     user = User()
     user.login('test_update_user','test_password')
     db = MongoModel(project=user.project,collection=user.collection)
-    db.delete({'_id':user.user.id})
+    db.delete({'username':'test_update_user'})
     db = MongoModel(project='internal',collection='project')
     db.delete({'name':'project update'})
 
