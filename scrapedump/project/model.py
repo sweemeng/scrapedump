@@ -1,6 +1,8 @@
 from mongomodel import model
 from bson.objectid import ObjectId
+import gridfs
 import copy
+from utils import file_handler
 
 
 # TODO: Find out why does a new field not added into the models
@@ -19,6 +21,7 @@ class Project(object):
         name = self.to_mongo_name()
         for entry in self.project.stats:
             if entry != 'system.indexes':
+                print entry
                 api_list.append('/api/db/%s/%s/' % (name,self.project.stats[entry]['entry']))
         return api_list 
     
@@ -56,17 +59,17 @@ class Project(object):
                 data = copy.deepcopy(self.project.stats_template)
                 data['entry'] = name
                 self.project.stats[name] = data
+                self.project.input_file[name] = {}
                 self.save()
     
-    def get_db(self):
+    def get_entries(self):
         mongo_model = model.MongoModel(project=self.to_mongo_name())
-        temp_entries = mongo_model.db.collection_names()
-        for entry in temp_entries:
-            if entry != 'system.indexes':
-                if entry not in self.project.stats:
-                    self.create_entries(entry)
         return [model.MongoModel(self.project.name_to_mongo(),entry) for entry in self.project.stats]
     
+    def get_db(self):
+        project = model.MongoModel(project=self.to_mongo_name())
+        return project.db
+
     def get_stats(self):
         # use the stats variable do not generate new
         temp = []
@@ -89,7 +92,35 @@ class Project(object):
     def set_workers(self,task_id):
         self.project.task_id = task_id
         self.save()
-
+    
+    def add_datafile(self,entry,datafile):
+        # have a reliable way to get file size
+        if not file_handler.validator(datafile):
+            return ''
+        db = self.get_db()
+        fs = gridfs.GridFS(db)
+        file_id = fs.put(datafile.read())
+        data_file = fs.get(file_id)
+        input_files = self.project.input_file
+        temp = copy.deepcopy(self.project.input_file_template)    
+        temp['filename'] = datafile.filename 
+        temp['filesize'] = data_file.length
+        input_files[entry][str(file_id)] = temp
+        self.save()
+    
+    def get_datafile(self,file_id):
+        # return file
+        # the flow is we get a project via url
+        # then we get via id, the i.e the gridfs way
+        db = self.get_db()
+        fs = gridfs.GridFS(db)
+        file_ = fs.get(file_id)
+        return file_
+    
+    def list_datafile(self,entry):
+        # do we store an url?
+        pass
+    
 
 class ProjectList(object):
     def __init__(self):
@@ -142,6 +173,15 @@ class ProjectTemplate(object):
                 'output_file':[],
                 'task_id':'',
             }
+        # the key is the entry, 
+        # task_id is for celery task for loading data
+        self.input_file = {}
+        # each entry will be a dict, the key is the gridfs id, 
+        self.input_file_template = {
+                'filename':'',
+                'filesize':'',
+                'task_id':''
+            }
 
     def to_mongo(self):
         data = {}
@@ -151,6 +191,7 @@ class ProjectTemplate(object):
         data['task_id'] = self.task_id
         data['output_file'] = []
         data['out_count'] = []
+        data['input_file'] = self.input_file
         data['stats'] = self.stats
         return data
     
@@ -163,15 +204,6 @@ class ProjectTemplate(object):
                 continue
             setattr(self,key,data[key])
 
-        mongo_model = model.MongoModel(project=self.name_to_mongo())
-        coll = mongo_model.db.collection_names()
-        for c in coll:
-            if c not in self.stats:
-                # collect data
-                if c != "system.indexes":
-                    data = copy.deepcopy(self.stats_template)
-                    data['entry'] = c
-                    self.stats[c] = data
     
     def name_to_mongo(self):
         return self.name.replace(' ','_')

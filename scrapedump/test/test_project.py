@@ -1,7 +1,10 @@
 from nose.tools import with_setup
+from mock import MagicMock
+import gridfs
 from project.model import Project
 from project.model import ProjectTemplate
 from mongomodel.model import MongoModel 
+import cStringIO
 
 # add test for project
 
@@ -85,12 +88,12 @@ def teardown_test_project_db():
     db.delete({'name':'test project db'})
 
 @with_setup(setup_test_project_db,teardown_test_project_db)
-def test_project_db():
+def test_project_stats():
     project = Project()
     project.find('test project db')
-    databases = project.get_db()
+    databases = project.get_stats()
     for database in databases:
-        assert type(database) == MongoModel
+        assert database == 'test_entries' 
 
 # now also each project need to actually linked to a real db
 def setup_test_project_api():
@@ -109,3 +112,61 @@ def test_project_api():
     print project.get_api()
     assert '/api/db/test_project_db/test_entries/' in project.get_api()
 
+def setup_test_project_upload():
+    project = Project()
+    project.create('test project upload',' list entries')
+    project.add_entries('test_entries')
+
+def teardown_test_project_upload():
+    project = Project()
+    project.find('test project upload') 
+    fs = gridfs.GridFS(project.get_db())
+    for file_id in project.project.input_file:
+        fs.delete(file_id)
+    db = MongoModel(project='internal',collection='project')
+    
+    db.delete({'name':'test project upload'})
+
+def mock_open(filename,data=None):
+    mock = MagicMock(spec=file,filename=filename)
+    handle = MagicMock(spec=file)
+    handle.write.return_value = None
+    handle.read.return_value = data.getvalue()
+    if data is None:
+        handle.__enter__.return_value = handle
+    else:
+        handle.__enter__.return_value = data
+    mock.return_value = handle
+    return mock
+
+class MockFile(object):
+    def __init__(self,filename,data):
+        self.filename = filename
+        self.data = data
+    
+    def read(self):
+        return self.data
+
+@with_setup(setup_test_project_upload,teardown_test_project_upload)
+def test_project_file_upload():
+    content = "a,b,c\n1,2,3\n4,5,6"
+    test_data = cStringIO.StringIO(content)
+    f = MockFile('test_data.csv',content)
+    project = Project()
+    project.find('test project upload')
+    project.add_datafile('test_entries',f)
+    
+    input_file = project.project.input_file
+    exist_flag = False
+    for entry in input_file:
+        for file_id in input_file[entry]:
+            if input_file[entry][file_id]['filename'] == 'test_data.csv':
+                exist_flag = True
+    
+    assert exist_flag 
+
+def test_project_file_get():
+    pass
+
+def test_project_file_list():
+    pass
