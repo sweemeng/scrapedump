@@ -1,6 +1,7 @@
 from nose.tools import with_setup
 from mock import MagicMock
 import gridfs
+from bson.objectid import ObjectId
 from project.model import Project
 from project.model import ProjectTemplate
 from mongomodel.model import MongoModel 
@@ -121,8 +122,9 @@ def teardown_test_project_upload():
     project = Project()
     project.find('test project upload') 
     fs = gridfs.GridFS(project.get_db())
-    for file_id in project.project.input_file:
-        fs.delete(file_id)
+    for entry in project.project.input_file:
+        for file_id in project.project.input_file[entry]:
+            fs.delete(ObjectId(file_id))
     db = MongoModel(project='internal',collection='project')
     
     db.delete({'name':'test project upload'})
