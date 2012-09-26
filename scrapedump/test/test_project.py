@@ -167,8 +167,41 @@ def test_project_file_upload():
     
     assert exist_flag 
 
-def test_project_file_get():
-    pass
+def setup_test_project_download():
+    project = Project()
+    project.create('test project download',' list entries')
+    content = "a,b,c\n1,2,3\n4,5,6"
+    f = MockFile('test_data.csv',content)
+    project.add_entries('test_entries')
+    project.add_datafile('test_entries',f)
+
+def teardown_test_project_download():
+    project = Project()
+    project.find('test project download') 
+    fs = gridfs.GridFS(project.get_db())
+    for entry in project.project.input_file:
+        for file_id in project.project.input_file[entry]:
+            fs.delete(ObjectId(file_id))
+    db = MongoModel(project='internal',collection='project')
+    
+    db.delete({'name':'test project download'})
+
+@with_setup(setup_test_project_download,teardown_test_project_download)
+def test_project_file_download():
+    content = "a,b,c\n1,2,3\n4,5,6"
+    project = Project()
+    project.find('test project download')
+    data = project.project.input_file
+    files = data['test_entries']
+    valid_flag = False
+    for file_id in files:
+        test_file = project.get_datafile(file_id)
+        test_data = test_file.read()
+        if test_data == content:
+            valid_flag = True
+    
+    assert valid_flag
+        
 
 def test_project_file_list():
     pass

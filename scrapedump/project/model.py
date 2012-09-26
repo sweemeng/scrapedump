@@ -99,7 +99,10 @@ class Project(object):
             return ''
         db = self.get_db()
         fs = gridfs.GridFS(db)
-        file_id = fs.put(datafile.read())
+        if hasattr(datafile,'name'):
+            file_id = fs.put(datafile.read())
+        elif hasattr(datafile,'filename'):
+            file_id = fs.put(datafile.read(),filename=datafile.filename)
         data_file = fs.get(file_id)
         input_files = self.project.input_file
         temp = copy.deepcopy(self.project.input_file_template)    
@@ -114,7 +117,7 @@ class Project(object):
         # then we get via id, the i.e the gridfs way
         db = self.get_db()
         fs = gridfs.GridFS(db)
-        file_ = fs.get(file_id)
+        file_ = fs.get(ObjectId(file_id))
         return file_
     
     def list_datafile(self,entry):
