@@ -7,7 +7,9 @@
 <ul class="nav nav-tabs" id="project_tabs">
     <li {% if not edit %}class="active"{% endif %}><a href="#detail" data-toggle="tabs">Detail</a></li>
     <li><a href="#usage" data-toggle="tabs">Usage</a></li>
+    {% if current_user.is_authenticated() %}
     <li {% if edit %} class="active" {% endif %}><a href="#edit" data-toggle="tabs">Edit</a></li>
+    {% endif %}
 </ul>
 <div id="project_tabs_content" class="tab-content">
     <div id="detail" class="tab-pane fade{% if not edit %} in active{% endif %}">
