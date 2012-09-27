@@ -4,7 +4,7 @@ import gridfs
 import copy
 from utils import file_handler
 
-
+    
 # TODO: Find out why does a new field not added into the models
 class Project(object):
     def __init__(self):
@@ -65,6 +65,10 @@ class Project(object):
     def get_entries(self):
         mongo_model = model.MongoModel(project=self.to_mongo_name())
         return [model.MongoModel(self.project.name_to_mongo(),entry) for entry in self.project.stats]
+
+    def get_entry(self,entry):
+        mongo_model = model.MongoModel(project=self.to_mongo_name(),collection=entry)
+        return mongo_model
     
     def get_db(self):
         project = model.MongoModel(project=self.to_mongo_name())
@@ -123,6 +127,24 @@ class Project(object):
     def list_datafile(self,entry):
         # do we store an url?
         pass
+    
+    def load_datafile(self,entry,file_id):
+        datasource = self.project.input_file[entry][file_id]
+        datafile = self.get_datafile(file_id)
+        entry_ = self.get_entry(entry)
+        handler = file_handler.handler_factory(datafile)
+        for data in handler.run():
+            entry_.insert(data)
+        datasource['loaded'] = True
+    
+    def load_completed(self,entry,file_id):
+        pass
+    
+    def set_load_worker(self,entry,file_id,task_id):
+        datasource = self.project.input_file[entry][file_id]
+        datasource['task_id'] = task_id
+        self.save()
+    
     
 
 class ProjectList(object):
@@ -183,7 +205,8 @@ class ProjectTemplate(object):
         self.input_file_template = {
                 'filename':'',
                 'filesize':'',
-                'task_id':''
+                'task_id':'',
+                'loaded':False
             }
 
     def to_mongo(self):

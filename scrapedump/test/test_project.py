@@ -146,8 +146,8 @@ class MockFile(object):
         self.filename = filename
         self.data = data
     
-    def read(self):
-        return self.data
+    def read(self,buf=None):
+        return self.data[:buf]
 
 @with_setup(setup_test_project_upload,teardown_test_project_upload)
 def test_project_file_upload():
@@ -202,6 +202,37 @@ def test_project_file_download():
     
     assert valid_flag
         
-
 def test_project_file_list():
     pass
+
+def setup_test_load_data():
+    project = Project()
+    project.create('test load data',' list entries')
+    content = "a,b,c\n1,2,3\n4,5,6"
+    f = MockFile('test_data.csv',content)
+    project.add_entries('test_entries')
+    project.add_datafile('test_entries',f)
+    
+def teardown_test_load_data():
+    project = Project()
+    project.find('test load data') 
+    fs = gridfs.GridFS(project.get_db())
+    for entry in project.project.input_file:
+        for file_id in project.project.input_file[entry]:
+            fs.delete(ObjectId(file_id))
+    db = MongoModel(project='internal',collection='project')
+    
+    db.delete({'name':'test load data'})
+
+@with_setup(setup_test_load_data,teardown_test_load_data)
+def test_load_data():
+    project = Project()
+    project.find('test load data')
+    datasource = project.project.input_file['test_entries']
+    key = datasource.keys()[0]
+    entry = project.get_entry('test_entries')
+    print key
+    project.load_datafile('test_entries',key)
+    test_data = entry.query({'a':'1'})
+    assert test_data['b'] == '2' 
+    assert test_data['c'] == '3'
