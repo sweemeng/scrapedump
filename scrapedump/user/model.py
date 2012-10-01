@@ -68,11 +68,13 @@ class User(object):
         return self.user.project
 
     def add_project(self,project):
-        self.user.project.append(project)
+        if project.replace(' ','_') in self.user.project:
+            return
+        self.user.project.append(project.replace(' ','_'))
         self.save()
     
     def remove_project(self,project):
-        self.user.project.remove(project)
+        self.user.project.remove(project.replace(' ','_'))
         self.save()
     
     def update(self,password=None,email=None):

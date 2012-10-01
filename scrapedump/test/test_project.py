@@ -25,6 +25,7 @@ def setup_test_project_create():
 def teardown_test_project_create():
     db = MongoModel(project='internal',collection='project')
     db.delete({'name':'test project db'})
+    db.conn.drop_database('test_project_db')
    
 @with_setup(setup_test_project_create,teardown_test_project_create)
 def test_project_create():
@@ -48,6 +49,7 @@ def setup_test_project_update():
 def teardown_test_project_update():
     db = MongoModel(project='internal',collection='project')
     db.delete({'name':'test project update'})
+    db.conn.drop_database('test_project_update')
 
 @with_setup(setup_test_project_update,teardown_test_project_update)
 def test_project_update():
@@ -67,44 +69,51 @@ def setup_test_project_entries():
 def teardown_test_project_entries():
     db = MongoModel(project='internal',collection='project')
     db.delete({'name':'test project entries'})
+    db.conn.drop_database('test_project_entries')
 
 @with_setup(setup_test_project_entries,teardown_test_project_entries)
 def test_project_entries():
     project = Project()
     project.find('test project entries')
-    project.add_entries('test_entries')
+    # add_entries now should have a description and name file
+    # there should be a short name field, for field name
+    # We should have a source
+    project.add_entry('test entries','test data','test_entries','test_entries')
     
     db = MongoModel(project='internal',collection='project')
     temp = db.query({'name':'test project entries'})
-    assert 'test_entries' in temp['stats'] 
+    assert 'test entries' in temp['stats'] 
 
 # now also each project need to actually linked to a real db
 def setup_test_project_db():
     project = Project()
     project.create('test project db',' list entries')
-    project.add_entries('test_entries')
+    project.add_entry('test entries','test data','test_entries','test_data')
 
 def teardown_test_project_db():
     db = MongoModel(project='internal',collection='project')
     db.delete({'name':'test project db'})
+    db.conn.drop_database('test_project_db')
 
 @with_setup(setup_test_project_db,teardown_test_project_db)
 def test_project_stats():
     project = Project()
     project.find('test project db')
     databases = project.get_stats()
+    print databases
     for database in databases:
-        assert database == 'test_entries' 
+        assert database == 'test entries' 
 
 # now also each project need to actually linked to a real db
 def setup_test_project_api():
     project = Project()
     project.create('test project db',' list entries')
-    project.add_entries('test_entries')
+    project.add_entry('test entry','test data','test_entries','test_entries')
 
 def teardown_test_project_api():
     db = MongoModel(project='internal',collection='project')
     db.delete({'name':'test project db'})
+    db.conn.drop_database('test_project_db')
 
 @with_setup(setup_test_project_api,teardown_test_project_api)
 def test_project_api():
@@ -116,7 +125,7 @@ def test_project_api():
 def setup_test_project_upload():
     project = Project()
     project.create('test project upload',' list entries')
-    project.add_entries('test_entries')
+    project.add_entry('test entries','test entries','test_source','test_entries')
 
 def teardown_test_project_upload():
     project = Project()
@@ -128,6 +137,7 @@ def teardown_test_project_upload():
     db = MongoModel(project='internal',collection='project')
     
     db.delete({'name':'test project upload'})
+    db.conn.drop_database('test_project_upload')
 
 def mock_open(filename,data=None):
     mock = MagicMock(spec=file,filename=filename)
@@ -156,7 +166,7 @@ def test_project_file_upload():
     f = MockFile('test_data.csv',content)
     project = Project()
     project.find('test project upload')
-    project.add_datafile('test_entries',f)
+    project.add_datafile('test entries',f)
     
     input_file = project.project.input_file
     exist_flag = False
@@ -172,8 +182,8 @@ def setup_test_project_download():
     project.create('test project download',' list entries')
     content = "a,b,c\n1,2,3\n4,5,6"
     f = MockFile('test_data.csv',content)
-    project.add_entries('test_entries')
-    project.add_datafile('test_entries',f)
+    project.add_entry('test entries','test entry','test_entries','testdata')
+    project.add_datafile('test entries',f)
 
 def teardown_test_project_download():
     project = Project()
@@ -185,6 +195,7 @@ def teardown_test_project_download():
     db = MongoModel(project='internal',collection='project')
     
     db.delete({'name':'test project download'})
+    db.conn.drop_database('test_project_download')
 
 @with_setup(setup_test_project_download,teardown_test_project_download)
 def test_project_file_download():
@@ -192,7 +203,7 @@ def test_project_file_download():
     project = Project()
     project.find('test project download')
     data = project.project.input_file
-    files = data['test_entries']
+    files = data['test entries']
     valid_flag = False
     for file_id in files:
         test_file = project.get_datafile(file_id)
@@ -210,8 +221,8 @@ def setup_test_load_data():
     project.create('test load data',' list entries')
     content = "a,b,c\n1,2,3\n4,5,6"
     f = MockFile('test_data.csv',content)
-    project.add_entries('test_entries')
-    project.add_datafile('test_entries',f)
+    project.add_entry('test entries','test entries','test_entries','testdata')
+    project.add_datafile('test entries',f)
     
 def teardown_test_load_data():
     project = Project()
@@ -223,16 +234,17 @@ def teardown_test_load_data():
     db = MongoModel(project='internal',collection='project')
     
     db.delete({'name':'test load data'})
+    db.conn.drop_database('test_load_data')
 
 @with_setup(setup_test_load_data,teardown_test_load_data)
 def test_load_data():
     project = Project()
     project.find('test load data')
-    datasource = project.project.input_file['test_entries']
+    datasource = project.project.input_file['test entries']
     key = datasource.keys()[0]
-    entry = project.get_entry('test_entries')
+    entry = project.get_entry('test entries')
     print key
-    project.load_datafile('test_entries',key)
+    project.load_datafile('test entries',key)
     test_data = entry.query({'a':'1'})
     assert test_data['b'] == '2' 
     assert test_data['c'] == '3'

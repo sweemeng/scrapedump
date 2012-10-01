@@ -3,6 +3,7 @@ from bson.objectid import ObjectId
 import gridfs
 import copy
 from utils import file_handler
+from celery.result import AsyncResult
 
     
 # TODO: Find out why does a new field not added into the models
@@ -19,10 +20,11 @@ class Project(object):
     def get_api(self):
         api_list = []
         name = self.to_mongo_name()
-        for entry in self.project.stats:
+        print self.project.entry
+        for entry in self.project.entry:
             if entry != 'system.indexes':
                 print entry
-                api_list.append('/api/db/%s/%s/' % (name,self.project.stats[entry]['entry']))
+                api_list.append('/api/db/%s/%s/' % (name,self.project.entry[entry]['shortname']))
         return api_list 
     
     def get_url(self):
@@ -52,17 +54,38 @@ class Project(object):
     
     def to_mongo_name(self):
         return self.project.name.replace(' ','_')
-
-    def add_entries(self,name):
-        if name not in self.project.stats:
-            if name and not " " in name:
-                data = copy.deepcopy(self.project.stats_template)
-                data['entry'] = name
-                self.project.stats[name] = data
-                self.project.input_file[name] = {}
-                self.save()
+    
+    def add_entry(self,name,description,source,shortname=""):
+        # it is add one entry not add to entries
+        self.project.entry[name] = copy.deepcopy(self.project.entry_template)
+        self.project.entry[name]['description'] = description
+        self.project.entry[name]['source'] = source
+        # give a nicer default for shorname. It is used in mongo collection name. 
+        if not shortname:
+            shortname = name.replace(' ','_')
+        self.project.entry[name]['shortname'] = shortname
+        self.project.entry[name]['url'] = '/project/%s/%s/' % (name,shortname)
+        # remove the space check, we will reference back to this
+        self.add_stats(name)
+        print self.project.to_mongo()
+        self.save()
     
     def get_entries(self):
+        return self.project.entry 
+    
+    def get_entry_url(self,entry):
+        return '/project/%s' % entry
+
+    def add_stats(self,name):
+        
+        if name not in self.project.stats:
+            data = copy.deepcopy(self.project.stats_template)
+            data['entry'] = name
+            self.project.stats[name] = data
+            self.project.input_file[name] = {}
+            self.save()
+    
+    def get_mongo(self):
         mongo_model = model.MongoModel(project=self.to_mongo_name())
         return [model.MongoModel(self.project.name_to_mongo(),entry) for entry in self.project.stats]
 
@@ -100,7 +123,7 @@ class Project(object):
     def add_datafile(self,entry,datafile):
         # have a reliable way to get file size
         if not file_handler.validator(datafile):
-            return ''
+            raise InvalidFileTypeException('Only CSV/JSON file is handled')
         db = self.get_db()
         fs = gridfs.GridFS(db)
         if hasattr(datafile,'name'):
@@ -138,7 +161,16 @@ class Project(object):
         datasource['loaded'] = True
     
     def load_completed(self,entry,file_id):
-        pass
+        datasource = self.project.input_file[entry][file_id]
+        if not datasource['loaded']:
+            task = AsyncResult(datasource['task_id'])
+            if not task.ready():
+                return False
+            else:
+                datasource['loaded'] = True
+                self.save()
+        return True
+        
     
     def set_load_worker(self,entry,file_id,task_id):
         datasource = self.project.input_file[entry][file_id]
@@ -184,7 +216,16 @@ class ProjectTemplate(object):
         self.id = ''
         self.name = ''
         self.description = ''
+        # we will need entries detail
         self.entries = []
+        self.entry = {}
+        self.entry_template = {
+            'name':'',
+            'description':'',
+            'source':'',
+            'shortname':'',
+            'url':''
+        }
         self.task_id = ''
         self.output_file = []
         self.old_count = []
@@ -219,6 +260,7 @@ class ProjectTemplate(object):
         data['out_count'] = []
         data['input_file'] = self.input_file
         data['stats'] = self.stats
+        data['entry'] = self.entry
         return data
     
     def from_mongo(self,data):
@@ -233,3 +275,10 @@ class ProjectTemplate(object):
     
     def name_to_mongo(self):
         return self.name.replace(' ','_')
+
+class InvalidFileTypeException(Exception):
+    def __init__(self,value):
+        self.value = value
+    
+    def __str__(self):
+        return self.value

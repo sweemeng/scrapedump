@@ -29,6 +29,7 @@ def teardown_project():
         project.find(d[0])
         model = MongoModel(project=project.project_,collection=project.collection_)
         model.delete({'_id':ObjectId(str(project.project.id))})
+        model.conn.drop_database(d[0].replace(' ','_'))
 
 @with_setup(setup_project,teardown_project)
 def test_project_list():
@@ -131,6 +132,7 @@ def teardown_project_delete():
     project.find('project 1')
     model = MongoModel(project=project.project_,collection=project.collection_)
     model.delete({'name':'project 1'})
+    model.conn.drop_database('project_1')
 
 @with_setup(setup_project_delete,teardown_project_delete)
 def test_project_delete():
@@ -174,6 +176,7 @@ def teardown_user_project():
     project = Project()
     model = MongoModel(project=project.project_,collection=project.collection_)
     model.delete({'name':'project update'})
+    model.conn.drop_database('project_update')
     
 @with_setup(setup_user_project,teardown_user_project)
 def test_project_update():
@@ -206,6 +209,7 @@ def setup_user_project_list():
     project.create('project list 3','project content 3')
     user.add_project('project_list_1')
     user.add_project('project_list_2')
+    user.add_project('project_list_3')
 
 def teardown_user_project_list():
     user = User()
@@ -214,8 +218,11 @@ def teardown_user_project_list():
     project = Project()
     model = MongoModel(project=project.project_,collection=project.collection_)
     model.delete({'name':'project list 1'})
+    model.conn.drop_database('project_list_1')
     model.delete({'name':'project list 2'})
+    model.conn.drop_database('project_list_2')
     model.delete({'name':'project list 3'})
+    model.conn.drop_database('project_list_3')
 
 # do user join a project, or a project added to user?
 @with_setup(setup_user_project_list,teardown_user_project_list)
@@ -261,7 +268,7 @@ def test_user_project_withdraw():
 
     url = '/api/project/%s/?api_key=%s' % (project.project.id,api_key)
        
-    data = {'project':'project list 3','action':'withdraw'}
+    data = {'project':'project_list_3','action':'withdraw'}
 
     result = test_client.put(url,data=json.dumps(data),content_type='application/json')
     print result.data 
