@@ -6,7 +6,6 @@
 {% block container %}
 <ul class="nav nav-tabs" id="project_tabs">
     <li {% if not edit %}class="active"{% endif %}><a href="#detail" data-toggle="tabs">Detail</a></li>
-    <li><a href="#usage" data-toggle="tabs">Usage</a></li>
     {% if current_user.is_authenticated() %}
     <li {% if edit %} class="active" {% endif %}><a href="#edit" data-toggle="tabs">Edit</a></li>
     {% endif %}
@@ -39,80 +38,6 @@
         </table>
         </section>
     </div>
-    <div id="usage" class="tab-pane fade">
-        <div class="page-header"><h3>API Usage</h3></div>
-        <div class="alert">
-            <strong>Warning!</strong> Reading from API do not need API Key, but manipulating data will
-        </div>
-        <section>
-            <h5>Get</h5>
-            <p>
-                <p>List All Data</p>
-                <div class="well">
-                    {% for api in project.get_api() %}
-                        <p>GET {{api}}</p>
-                    {% endfor %}
-                </div>
-            </p>
-            <p>
-                <p>Get Single Item</p>
-                <div class="well">
-                    {% for api in project.get_api() %}
-                        <p>GET {{api}}&lt;id&gt;/</p>
-                    {% endfor %}
-                </div>
-            </p>
-        </section> 
-        <section>
-            <h5>Create</h5>
-            <p>
-                <p> To create, POST a json data </p>
-                <div class="well">
-                    {% for api in project.get_api() %}
-                        {% if current_user.is_authenticated() %}
-                        <p>POST {{api}}?api_key={{current_user.user.auth_token}}</p>
-                        {% else %}
-                        <p>POST {{api}}?api_key=&lt;api_key&gt;</p>
-                        {% endif %}
-                    {% endfor %}
-                </div>
-            </p>
-        </section>
-        <section>
-            <h5>Update</h5>
-            <p> 
-                <p>To update, PUT a json data to an id</p>        
-                <div class="well">
-                    {% for api in project.get_api() %}
-                        {% if current_user.is_authenticated() %}
-
-                        <p>PUT {{api}}&lt;id&gt;/?api_key={{current_user.user.auth_token}}</p>
-
-                        {% else %}
-                        <p>PUT {{api}}&lt;id&gt;/?api_key=&lt;api_key&gt;</p>
-                        {% endif %}
-                    {% endfor %}
-                </div>
-            </p>
-        </section>
-        <section>
-            <h5>Delete</h5>
-            <p>To delete, DELETE on a endpoint</p>
-            <p>
-                <div class="well">
-                    {% for api in project.get_api() %}
-                    {% if current_user.is_authenticated() %}
-                    <p>DELETE {{api}}&lt;id&gt;/?api_key={{ current_user.user.auth_token}}</p>
-                       
-                    {% else %}
-                    <p>DELETE {{api}}&lt;id&gt;/?api_key=&lt;api_key&gt;</p>
-                    {% endif %}
-                    {% endfor %}
-                </div>
-            </p>
-        </section>
-         
-    </div>
     {% if current_user.is_authenticated() %}
     <div id="edit" class="tab-pane fade{% if edit %} in active{% endif %}">
         <form class="form-horizontal" method="POST" action="">
@@ -124,20 +49,8 @@
                     </textarea>
                 </div>
             </div>
-            <div class="control-group">
-                <label class="control-label" for="{{ form.entry.id}}">{{form.entry.label.text}}:</label>
-                <div class="controls">
-                    <input type="text" name="{{ form.entry.name }}" id="{{ form.entry.id }}" class="input-xlarge">
-                </div>  
-            </div>
-           
-            {% for e in project.project.entries %}
-            <div class="control-group">
-                <div class="controls">
-                    <span class="input-xlarge uneditable-input">{{e}}</span>
-                </div>
-            </div>
-            {% endfor %}
+                      
+            
             <div class="control-group">
                 <div class="controls">
                     <button type="submit" class="btn">Save</button>

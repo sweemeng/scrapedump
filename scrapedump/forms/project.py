@@ -12,12 +12,10 @@ class ProjectForm(Form):
     description = TextAreaField('Description',validators=[
                                 Required(),])
     
-    entry = TextField('Entry',validators=[Required(),])
 
 
 class ProjectUpdateForm(Form):
     description = TextAreaField('Description',validators=[
                                 Required(),])
 
-    entry = TextField('Entry')
 
