@@ -182,8 +182,8 @@ def setup_test_project_download():
     project.create('test project download',' list entries')
     content = "a,b,c\n1,2,3\n4,5,6"
     f = MockFile('test_data.csv',content)
-    project.add_entry('test entries','test entry','test_entries','testdata')
-    project.add_datafile('test entries',f)
+    entry_id = project.add_entry('test entries','test entry','test_entries','testdata')
+    project.add_datafile(entry_id,f)
 
 def teardown_test_project_download():
     project = Project()
@@ -203,7 +203,8 @@ def test_project_file_download():
     project = Project()
     project.find('test project download')
     data = project.project.input_file
-    files = data['test entries']
+    entry_id = project.find_entry('test entries')
+    files = data[entry_id]
     valid_flag = False
     for file_id in files:
         test_file = project.get_datafile(file_id)
@@ -221,8 +222,8 @@ def setup_test_load_data():
     project.create('test load data',' list entries')
     content = "a,b,c\n1,2,3\n4,5,6"
     f = MockFile('test_data.csv',content)
-    project.add_entry('test entries','test entries','test_entries','testdata')
-    project.add_datafile('test entries',f)
+    entry_id = project.add_entry('test entries','test entries','test_entries','testdata')
+    project.add_datafile(entry_id,f)
     
 def teardown_test_load_data():
     project = Project()
@@ -240,11 +241,12 @@ def teardown_test_load_data():
 def test_load_data():
     project = Project()
     project.find('test load data')
-    datasource = project.project.input_file['test entries']
+    entry_id = project.find_entry('test entries')
+    datasource = project.project.input_file[entry_id]
     key = datasource.keys()[0]
-    entry = project.get_entry('test entries')
+    entry = project.get_entry_collections(entry_id)
     print key
-    project.load_datafile('test entries',key)
+    project.load_datafile(entry_id,key)
     test_data = entry.query({'a':'1'})
     assert test_data['b'] == '2' 
     assert test_data['c'] == '3'

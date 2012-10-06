@@ -2,6 +2,7 @@ from mongomodel import model
 from bson.objectid import ObjectId
 import gridfs
 import copy
+import uuid
 from utils import file_handler
 from celery.result import AsyncResult
 
@@ -27,8 +28,12 @@ class Project(object):
                 api_list.append('/api/db/%s/%s/' % (name,self.project.entry[entry]['shortname']))
         return api_list 
     
+    def get_entry_api(self,entry_id):
+        name = self.to_mongo_name()
+        return '/api/db/%s/%s/' % (name,entry_id)
+     
     def get_url(self):
-        return '/project/%s/' % (self.project.name.replace(' ','_'))
+        return '/project/%s/' % (self.project.id)
      
     def create(self,name,description):
         self.project.name = name
@@ -44,7 +49,7 @@ class Project(object):
         result = self.model.query({'name':name})
         self.project.from_mongo(result)
         return self
-
+    
     def save(self):
         if self.project.id:
             self.model.update({'_id':ObjectId(str(self.project.id))},self.project.to_mongo())
@@ -56,43 +61,71 @@ class Project(object):
         return self.project.name.replace(' ','_')
     
     def add_entry(self,name,description,source,shortname=""):
+        # key should be short_name
+        # fix unit test for this. 
+        # and a few other url library
         # it is add one entry not add to entries
-        self.project.entry[name] = copy.deepcopy(self.project.entry_template)
-        self.project.entry[name]['description'] = description
-        self.project.entry[name]['source'] = source
-        # give a nicer default for shorname. It is used in mongo collection name. 
+        entry_id = uuid.uuid4()
+        entry_id = str(entry_id)
         if not shortname:
             shortname = name.replace(' ','_')
-        self.project.entry[name]['shortname'] = shortname
-        self.project.entry[name]['url'] = '/project/%s/%s/' % (name,shortname)
+
+        self.project.entry[entry_id] = copy.deepcopy(self.project.entry_template)
+        self.project.entry[entry_id]['description'] = description
+        self.project.entry[entry_id]['source'] = source
+        # give a nicer default for shorname. It is used in mongo collection name. 
+        self.project.entry[entry_id]['shortname'] = shortname
+        self.project.entry[entry_id]['url'] = '/project/%s/%s/' % (name,shortname)
         # remove the space check, we will reference back to this
-        self.add_stats(name)
+        self.add_stats(entry_id)
         print self.project.to_mongo()
         self.save()
+        return entry_id
     
     def get_entries(self):
         return self.project.entry 
     
-    def get_entry_url(self,entry):
-        return '/project/%s' % entry
+    def get_entry(self,entry_id):
+        temp = {}
+        temp.update(self.project.entry[entry_id])
+        temp.update(self.project.input_file[entry_id])
+        temp.update(self.project.stats[entry_id])
+        return temp 
+     
+    def update_entry(self,entry_id,description,source):
+        self.project.entry[entry_id]['description'] = description
+        self.project.entry[entry_id]['source'] = source
+        self.save()
+    
+    def get_entry_url(self,entry_id):
+        project_id = project.id
+        return '/project/%s/%s/' % (project_id,entry_id)
 
-    def add_stats(self,name):
+    def add_stats(self,entry_id):
         
         if name not in self.project.stats:
             data = copy.deepcopy(self.project.stats_template)
-            data['entry'] = name
-            self.project.stats[name] = data
-            self.project.input_file[name] = {}
+            data['entry'] = entry_id
+            self.project.stats[entry_id] = data
+            self.project.input_file[entry_id] = {}
             self.save()
     
-    def get_mongo(self):
+    def get_entries_collections(self):
+        # return shortname
         mongo_model = model.MongoModel(project=self.to_mongo_name())
-        return [model.MongoModel(self.project.name_to_mongo(),entry) for entry in self.project.stats]
+        return [model.MongoModel(self.project.name_to_mongo(),self.project.entry[entry]['shortname']) for entry in self.project.entry]
 
-    def get_entry(self,entry):
-        mongo_model = model.MongoModel(project=self.to_mongo_name(),collection=entry)
+    def get_entry_collection(self,entry_id):
+        entry = self.project.entry[entry_id]
+        mongo_model = model.MongoModel(project=self.to_mongo_name(),collection=entry['shortname'])
         return mongo_model
     
+    def find_entry(self,name):
+        entries = self.project.entry
+        for entry in entries:
+            if entries[entry]['name'] == name:
+                return entry
+        return None
     def get_db(self):
         project = model.MongoModel(project=self.to_mongo_name())
         return project.db
@@ -120,7 +153,7 @@ class Project(object):
         self.project.task_id = task_id
         self.save()
     
-    def add_datafile(self,entry,datafile):
+    def add_datafile(self,entry_id,datafile):
         # have a reliable way to get file size
         if not file_handler.validator(datafile):
             raise InvalidFileTypeException('Only CSV/JSON file is handled')
@@ -135,7 +168,7 @@ class Project(object):
         temp = copy.deepcopy(self.project.input_file_template)    
         temp['filename'] = datafile.filename 
         temp['filesize'] = data_file.length
-        input_files[entry][str(file_id)] = temp
+        input_files[entry_id][str(file_id)] = temp
         self.save()
     
     def get_datafile(self,file_id):
@@ -151,17 +184,17 @@ class Project(object):
         # do we store an url?
         pass
     
-    def load_datafile(self,entry,file_id):
-        datasource = self.project.input_file[entry][file_id]
+    def load_datafile(self,entry_id,file_id):
+        datasource = self.project.input_file[entry_id][file_id]
         datafile = self.get_datafile(file_id)
-        entry_ = self.get_entry(entry)
+        entry_ = self.get_entry_collection(entry_id)
         handler = file_handler.handler_factory(datafile)
         for data in handler.run():
             entry_.insert(data)
         datasource['loaded'] = True
     
-    def load_completed(self,entry,file_id):
-        datasource = self.project.input_file[entry][file_id]
+    def load_completed(self,entry_id,file_id):
+        datasource = self.project.input_file[entry_id][file_id]
         if not datasource['loaded']:
             task = AsyncResult(datasource['task_id'])
             if not task.ready():
@@ -172,8 +205,8 @@ class Project(object):
         return True
         
     
-    def set_load_worker(self,entry,file_id,task_id):
-        datasource = self.project.input_file[entry][file_id]
+    def set_load_worker(self,entry_id,file_id,task_id):
+        datasource = self.project.input_file[entry_id][file_id]
         datasource['task_id'] = task_id
         self.save()
     
@@ -237,7 +270,6 @@ class ProjectTemplate(object):
                 'old_count':0,
                 'output_count':0,
                 'output_file':[],
-                'task_id':'',
             }
         # the key is the entry, 
         # task_id is for celery task for loading data
