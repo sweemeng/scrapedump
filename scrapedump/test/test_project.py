@@ -78,11 +78,12 @@ def test_project_entries():
     # add_entries now should have a description and name file
     # there should be a short name field, for field name
     # We should have a source
-    project.add_entry('test entries','test data','test_entries','test_entries')
+    entry_id = project.add_entry('test entries','test data','test_entries','test_entries')
     
     db = MongoModel(project='internal',collection='project')
     temp = db.query({'name':'test project entries'})
-    assert 'test entries' in temp['stats'] 
+    
+    assert entry_id in temp['stats'] 
 
 # now also each project need to actually linked to a real db
 def setup_test_project_db():
@@ -99,10 +100,12 @@ def teardown_test_project_db():
 def test_project_stats():
     project = Project()
     project.find('test project db')
+    entry_id = project.find_entry('test entries')
+    print entry_id
+    print project.project.entry
     databases = project.get_stats()
-    print databases
     for database in databases:
-        assert database == 'test entries' 
+        assert database == entry_id 
 
 # now also each project need to actually linked to a real db
 def setup_test_project_api():
@@ -166,7 +169,8 @@ def test_project_file_upload():
     f = MockFile('test_data.csv',content)
     project = Project()
     project.find('test project upload')
-    project.add_datafile('test entries',f)
+    entry_id = project.find_entry('test entries')
+    project.add_datafile(entry_id,f)
     
     input_file = project.project.input_file
     exist_flag = False
@@ -244,7 +248,7 @@ def test_load_data():
     entry_id = project.find_entry('test entries')
     datasource = project.project.input_file[entry_id]
     key = datasource.keys()[0]
-    entry = project.get_entry_collections(entry_id)
+    entry = project.get_entry_collection(entry_id)
     print key
     project.load_datafile(entry_id,key)
     test_data = entry.query({'a':'1'})

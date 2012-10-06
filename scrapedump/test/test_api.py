@@ -1,5 +1,6 @@
 import webapp
 from mongomodel.model import MongoModel
+from project.model import Project
 from user.model import User
 
 from nose.tools import with_setup
@@ -7,9 +8,13 @@ import json
 import bson.objectid as objectid
 
 
+# this is a short test, but first, we need to bind project this to test now.
 
 def setup_test_get():
-    model =  MongoModel(project='scraped',collection='entry')
+    project = Project()
+    project.create('scraped','test scraping')
+    entry_id = project.add_entry('entry','test entry','entry','entry')
+    model =  project.get_entry_collection(entry_id)
     model.insert({'a':1})
 
 def teardown_test_get():
@@ -29,8 +34,11 @@ def teardown_user():
 
 @with_setup(setup_test_get,teardown_test_get)
 def test_get_all():
+    project = Project()
+    project.find('scraped')
+    entry_id = project.find_entry('entry')
     client = webapp.app.test_client()
-    response = client.get('/api/db/scraped/entry/')
+    response = client.get('/api/db/%s/%s/' % (project.project.id,entry_id))
     result = json.loads(response.data)
     
     assert result[0]['a'] == 1
@@ -43,7 +51,10 @@ def test_get():
     data = mongo.all()
 
     id = str(data[0]['_id'])
-    response = client.get('/api/db/scraped/entry/%s/' % (id))
+    project = Project()
+    project.find('scraped')
+    entry_id = project.find_entry('entry')
+    response = client.get('/api/db/%s/%s/%s/' % (project.project.id,entry_id,id))
     result = json.loads(response.data)
 
     assert result['a'] == 1
@@ -55,8 +66,10 @@ def test_insert():
     api_key = user.user.auth_token
     client = webapp.app.test_client()
     data = {'a':1}
-
-    url = '/api/db/scraped/entry/?api_key=%s' % api_key
+    project = Project()
+    project.find('scraped')
+    entry_id = project.find_entry('entry')
+    url = '/api/db/%s/%s/?api_key=%s' % (project.project.id,entry_id,api_key)
     response = client.post(url,data=json.dumps(data),
             content_type='application/json')
     
@@ -91,12 +104,15 @@ def test_update():
     user = User()
     user.login('test_user','test_pass')
     api_key = user.user.auth_token
-    
+
+    project = Project()
+    project.find('scraped')
+    entry_id = project.find_entry('entry')
     mongo = MongoModel(project='scraped',collection='entry')
     data = mongo.query({'a':1})
     id = str(data['_id'])
     updated = {'a':2}
-    url = '/api/db/scraped/entry/%s/?api_key=%s' % (id,api_key) 
+    url = '/api/db/%s/%s/%s/?api_key=%s' % (project.project.id,entry_id,id,api_key) 
     
     client = webapp.app.test_client()
     response = client.put(url, data = json.dumps(updated),
@@ -117,10 +133,13 @@ def test_delete():
     client = webapp.app.test_client()
 
     mongo.insert({'a':1})
-
+    
     data = mongo.query({'a':1})
     id = str(data['_id'])
-    url = '/api/db/scraped/entry/%s/?api_key=%s' % (id,api_key) 
+    project = Project()
+    project.find('scraped')
+    entry_id = project.find_entry('entry')
+    url = '/api/db/%s/%s/%s/?api_key=%s' % (project.project.id,entry_id,id,api_key) 
     response = client.delete(url)
 
     status = json.loads(response.data)

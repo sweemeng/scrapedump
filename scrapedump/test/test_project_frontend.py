@@ -18,9 +18,11 @@ def teardown_project_view():
 def test_project_view():
     test_client = webapp.app.test_client()
     result = test_client.get('/')
-    assert 'project view' in result.data
+    project = Project()
+    project.find('project view')
+    assert project.project.id in result.data
     
-    result = test_client.get('/project/project_view/')
+    result = test_client.get('/project/%s/'% project.project.id)
     assert 'project view' in result.data
     assert 'data' in result.data
 
@@ -75,8 +77,9 @@ def test_project_update():
         'username':'test_update_user',
         'password':'test_password'
     },follow_redirects=True)
-    
-    project_ui = test_client.post('/project/project_update/',data={
+    project = Project()
+    project.find('project update') 
+    project_ui = test_client.post('/project/%s/' % project.project.id,data={
         'description':'project updated',
     },follow_redirects=True) 
     

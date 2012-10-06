@@ -69,8 +69,9 @@ class Project(object):
         entry_id = str(entry_id)
         if not shortname:
             shortname = name.replace(' ','_')
-
+     
         self.project.entry[entry_id] = copy.deepcopy(self.project.entry_template)
+        self.project.entry[entry_id]['name'] = name
         self.project.entry[entry_id]['description'] = description
         self.project.entry[entry_id]['source'] = source
         # give a nicer default for shorname. It is used in mongo collection name. 
@@ -103,7 +104,7 @@ class Project(object):
 
     def add_stats(self,entry_id):
         
-        if name not in self.project.stats:
+        if entry_id not in self.project.stats:
             data = copy.deepcopy(self.project.stats_template)
             data['entry'] = entry_id
             self.project.stats[entry_id] = data

@@ -60,10 +60,10 @@ app.add_url_rule('/api/project/',view_func=project_api,methods=['POST',])
 app.add_url_rule('/api/project/<project_id>/',
         view_func=project_api,methods=['GET','PUT','DELETE',])
 
-app.add_url_rule('/api/db/<project>/<entry>/',defaults={'entry_id':None},
+app.add_url_rule('/api/db/<project_id>/<entry>/',defaults={'entry_id':None},
         view_func=api_views,methods=['GET',])
-app.add_url_rule('/api/db/<project>/<entry>/',view_func=api_views,methods=['POST',])
-app.add_url_rule('/api/db/<project>/<entry>/<entry_id>/',
+app.add_url_rule('/api/db/<project_id>/<entry>/',view_func=api_views,methods=['POST',])
+app.add_url_rule('/api/db/<project_id>/<entry>/<entry_id>/',
         view_func=api_views,methods=['GET','PUT','DELETE',])
 
 
