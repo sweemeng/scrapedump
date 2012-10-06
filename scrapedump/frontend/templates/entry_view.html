@@ -25,6 +25,27 @@
     </div>
     {% if current_user.is_authenticated() %}
     <div id="edit" class="tab-pane fade{% if edit %} in active{% endif %}">
+        <form class="form-horizontal" method="POST" action="">
+            <div class="control-group">
+                <label class="control-label" for="{{  form.description.id }}">Description :</label>
+                <div class="controls">
+                    <textarea name="{{ form.description.name }}" id="{{ form.description.id }}">
+                        {{ project.get_entry(entry_id)['description'] }}
+                    </textarea>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="{{ form.source.id }}">Source :</label>
+                <div class="controls">
+                   <input type="text" class="input-xlarge" name="{{ form.source.name }}" id="{{ form.source.id }}" value="{{ project.get_entry(entry_id)['source'] }}">
+                </div>
+            </div>
+            <div class="control-group">
+                <div class="controls">
+                    <button type="submit" class="btn">Update</button>
+                </div>
+            </div>
+        </form>
     </div>
     {% endif %}
 </div>
