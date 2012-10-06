@@ -6,6 +6,7 @@
 {% block container %}
 <ul class="nav nav-tabs" id="entry_tabs">
     <li {% if not edit %}class="active"{% endif %}><a href="#detail" data-toggle="tabs">Detail</a></li>
+    <li><a href="#api" data-toggle="tabs">REST Interface</a></li>
     {% if current_user.is_authenticated() %}
     <li {% if edit %} class="active" {% endif %}><a href="#edit" data-toggle="tabs">Edit</a></li>
     {% endif %}
@@ -22,6 +23,53 @@
                 <dd>{{ project.get_entry(entry_id)['count'] }}</dd>
             </dl>
         </div>
+    </div>
+    <div id="api" class="tab-pane fade">
+        <div class="page-header"><h3>REST Interface</h3></div>
+        <section>
+            <h5>Get</h5>
+            <p>
+                <p>List All Data</p>
+                <div class="well">
+                    <p>GET {{ project.get_entry_api(entry_id) }}</p>
+                </div>
+            </p>
+            <p>
+                <p>Get Single Item</p>
+                <div class="well">
+                    <p>GET {{ project.get_entry_api(entry_id) }}&lt;id&gt;/</p>
+                </div>
+            </p>
+        </section>
+        {% if current_user.is_authenticated() %}
+        <section>
+            <h5>Post</h5>
+            <p>
+              <p>To create new item, do a POST request with json payload</p>
+              <div class="well">
+                  <p>POST {{ project.get_entry_api(entry_id) }}?api_key={{current_user.user.auth_token}}</p>
+              </div>
+            </p>
+        </section>
+        <section>
+            <h5>Put</h5>
+            <p>
+              <p>To update item, do a PUT request with json payload</p>
+              <div class="well">
+                  <p>POST {{ project.get_entry_api(entry_id) }}&lt;id&gt;/?api_key={{current_user.user.auth_token}}</p>
+              </div>
+            </p>
+        </section>
+        <section>
+            <h5>Delete</h5>
+            <p>
+              <p>To delete, just do a DELETE request</p>
+              <div class="well">
+                  <p>POST {{ project.get_entry_api(entry_id) }}&lt;id&gt;/?api_key={{current_user.user.auth_token}}</p>
+              </div>
+            </p>
+        </section>
+        {% endif %}
     </div>
     {% if current_user.is_authenticated() %}
     <div id="edit" class="tab-pane fade{% if edit %} in active{% endif %}">

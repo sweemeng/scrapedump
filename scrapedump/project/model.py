@@ -30,7 +30,7 @@ class Project(object):
     
     def get_entry_api(self,entry_id):
         name = self.to_mongo_name()
-        return '/api/db/%s/%s/' % (name,entry_id)
+        return '/api/db/%s/%s/' % (self.project.id,entry_id)
      
     def get_url(self):
         return '/project/%s/' % (self.project.id)
