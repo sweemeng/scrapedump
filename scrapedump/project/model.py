@@ -66,6 +66,8 @@ class Project(object):
         # fix unit test for this. 
         # and a few other url library
         # it is add one entry not add to entries
+        if self.find_entry(name):
+            raise EntryExistException('entry exist')
         entry_id = uuid.uuid4()
         entry_id = str(entry_id)
         if not shortname:
@@ -310,7 +312,16 @@ class ProjectTemplate(object):
     def name_to_mongo(self):
         return self.name.replace(' ','_')
 
+
 class InvalidFileTypeException(Exception):
+    def __init__(self,value):
+        self.value = value
+    
+    def __str__(self):
+        return self.value
+
+
+class EntryExistException(Exception):
     def __init__(self,value):
         self.value = value
     
