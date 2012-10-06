@@ -29,9 +29,9 @@
             {% for key,value in project.get_stats().items() %}
             {% if value.entry != "system.indexes" %}
             <tr>
-                <td>{{ value.entry }}</td>
+                <td>{{ project.project.entry[value.entry]['name'] }}</td>
                 <td>{{ value.count }}</td>
-                <td><a href="/api/db/{{project.project.name_to_mongo()}}/{{value.entry}}/">Raw Dump</a></td>
+                <td><a href="/api/db/{{project.project.id}}/{{value.entry}}/">Raw Dump</a></td>
             </tr>
             {% endif %}
             {% endfor %}

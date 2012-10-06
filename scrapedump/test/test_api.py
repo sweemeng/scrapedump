@@ -20,6 +20,8 @@ def setup_test_get():
 def teardown_test_get():
     model = MongoModel(project='scraped',collection='entry')
     model.delete({'a':1})
+    model = MongoModel(project='internal',collection='project')
+    model.delete({'name':'scraped'})
 
 def setup_user():
     user = User()

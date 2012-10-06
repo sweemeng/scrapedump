@@ -63,26 +63,39 @@ def project_create():
     
     return render_template('project_create.html',form=form)
 
-@frontend.route('/project/<project_id>/entry/create/',methods=['GET','POST'])
+@frontend.route('/entry/<project_id>/create/',methods=['GET','POST'])
 def project_entry_create(project_id):
-    form = EntryCreateForm(csrf_enabled=False)
+    form = EntryForm(csrf_enabled=False)
     edit = False
+    project = Project()
+    project.get(project_id)
     if form.validate_on_submit():
-        pass
-    return render_template('entry_view.html',project=project,entry=entry,edit=edit)
+        name = form.name.data
+        description = form.description.data
+        source = form.source.data
+        entry_id = project.add_entry(name,description,source)
+        return redirect('/entry/%s/%s/' % (project_id,entry_id))
+        
+    return render_template('entry_create.html',form=form)
 
 
-@frontend.route('/project/<project_id>/<entry_id>/',methods=['GET','POST'])
-def project_entry_detail(project_id,entry_name):
+@frontend.route('/entry/<project_id>/<entry_id>/',methods=['GET','POST'])
+def project_entry_detail(project_id,entry_id):
     # add entry should be a new form, remove from old form
     form = EntryUpdateForm(csrf_enabled=False)
     # we also will need upload form FYI
     project = Project()
-    project.find(project_id)
-    stats = project.project.stats[entry_id]
-    data_files = project.project.input_file[entry_id]
+    project.get(project_id)
+    edit = False
+    print project.project.entry.keys()
+    entry = project.get_entry(entry_id)
+    if form.validate_on_submit():
+        description = form.description.data
+        source = form.source.data
+        project.update_entry(entry_id,description,source)
+        edit = True
     # not to mention we will need a project detail
-    return render_template('entry_detail.html',project=project,form=form,edit=edit)
+    return render_template('entry_view.html',project=project,form=form,edit=edit,entry_id=entry_id)
 
 @frontend.route('/project/upload/<project_id>/<entry_id>/',methods=['POST'])
 @login_required

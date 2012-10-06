@@ -53,6 +53,7 @@ class Project(object):
     def save(self):
         if self.project.id:
             self.model.update({'_id':ObjectId(str(self.project.id))},self.project.to_mongo())
+            self.get(self.project.id) 
         else:
             id = self.model.insert(self.project.to_mongo())
             self.project.id = id
@@ -100,7 +101,7 @@ class Project(object):
     
     def get_entry_url(self,entry_id):
         project_id = project.id
-        return '/project/%s/%s/' % (project_id,entry_id)
+        return '/entry/%s/%s/' % (project_id,entry_id)
 
     def add_stats(self,entry_id):
         
