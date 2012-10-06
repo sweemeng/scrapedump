@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Entry {% endblock %}
+{% block extra_header %}
+
+{% endblock %}
+{% block container %}
+<ul class="nav nav-tabs" id="entry_tabs">
+    <li {% if not edit %}class="active"{% endif %}><a href="#detail" data-toggle="tabs">Detail</a></li>
+    {% if current_user.is_authenticated() %}
+    <li {% if edit %} class="active" {% endif %}><a href="#edit" data-toggle="tabs">Edit</a></li>
+    {% endif %}
+</ul>
+<div id="entry_tabs_content" class="tab-content">
+    <div id="detail" class="tab-pane fade{% if not edit %} in active{% endif %}">
+        <div class="page-header"><h3>{{ project.get_entry(entry_id)['name'] }}</h3></div> 
+        <div class="well">
+            {{ project.get_entry(entry_id)['description'] }}
+        </div>
+        <div id="entry_stats">
+            <dl class="dl-horizontal">
+                <dt>Count:</dt>
+                <dd>{{ project.get_entry(entry_id)['count'] }}</dd>
+            </dl>
+        </div>
+    </div>
+    {% if current_user.is_authenticated() %}
+    <div id="edit" class="tab-pane fade{% if edit %} in active{% endif %}">
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="/static/js/bootstrap-tab.js"></script>
+<script src="/static/js/bootstrap-scrollspy.js"></script>
+<script>
+    $(function(){
+        $('#entry_tabs a').click(function(e){
+            e.preventDefault();
+            $(this).tab('show');
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Create project{% endblock %}
+{% block container %}
+    <div class="row">
+        <div class="span4 offset4">
+           <form class="form-horizontal" method="POST" action="">
+               <fieldset>
+                   <div class="control-group">
+                       <label class="control-label" for="{{form.name.id}}">{{form.name.label.text}}</label>
+                       <div class="controls">
+                           {% if form.name.data %}
+                               <input type="text" id="{{form.name.id}}" class="input-xlarge" name="{{form.name.name}}" value="{{form.name.data}}">
+                           {% else %}
+                               <input type="text" id="{{form.name.id}}" class="input-xlarge" name="{{form.name.name}}">
+                           {% endif %}
+                       </div>
+                   </div>
+                   <div class="control-group">
+                       <label class="control-label" for="{{form.description.id}}">{{form.description.label.text}}</label>
+                       <div class="controls">
+                           <textarea class="input-xlarge" id="{{form.description.id}}" rows="3" name="{{form.description.name}}">
+                           {% if form.description.data %}{{ form.description.data }}{% endif %}
+                           </textarea>
+                       </div>
+                   </div>
+                   <div class="control-group">
+                       <label class="control-label" for="{{form.source.id}}">{{form.source.label.text}}</label>
+                       <div class="controls">
+                           {% if form.source.data %}
+                               <input type="text" id="{{form.source.id}}" class="input-xlarge" name="{{form.source.name}}" value="{{form.source.data}}">
+                           {% else %}
+                               <input type="text" id="{{form.source.id}}" class="input-xlarge" name="{{form.source.name}}">
+                           {% endif %}
+                       </div>
+                   </div>
+
+                   <div class="control-group">
+                       <div class="controls">
+                           <button type="submit" class="btn">Create</button>
+                       </div>
+                   </div>
+               </fieldset>
+           </form> 
+        </div>
+    </div>
+{% endblock %}
