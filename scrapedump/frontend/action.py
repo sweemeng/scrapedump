@@ -161,7 +161,7 @@ def get_entry(project_id,entry):
 @frontend.route('/entry/<project_id>/',methods=['POST','GET'])
 def add_entry(project_id):
     form = EntryForm(csrf_enabled=False)
-    if form.validated_on_submit():
+    if form.validate_on_submit():
         project = Project()
         project.get(project_id)
         name = form.name.data

@@ -4,6 +4,13 @@
 
 {% endblock %}
 {% block container %}
+{% if current_user.is_authenticated() %}
+    <ul class="nav nav-pills">
+        <li class="active">
+            <a href="/entry/{{ project.project.id }}/">New Entry</a>
+        </li>
+    </ul>
+{% endif %}
 <ul class="nav nav-tabs" id="project_tabs">
     <li {% if not edit %}class="active"{% endif %}><a href="#detail" data-toggle="tabs">Detail</a></li>
     {% if current_user.is_authenticated() %}
@@ -27,13 +34,11 @@
                 <th>Data Dump</th>
             <tr>
             {% for key,value in project.get_stats().items() %}
-            {% if value.entry != "system.indexes" %}
             <tr>
-                <td>{{ project.project.entry[value.entry]['name'] }}</td>
+                <td><a href="/entry/{{project.project.id}}/{{value.entry}}/">{{ project.project.entry[value.entry]['name'] }}</a></td>
                 <td>{{ value.count }}</td>
                 <td><a href="/api/db/{{project.project.id}}/{{value.entry}}/">Raw Dump</a></td>
             </tr>
-            {% endif %}
             {% endfor %}
         </table>
         </section>
