@@ -11,11 +11,31 @@
     <li {% if edit %} class="active" {% endif %}><a href="#edit" data-toggle="tabs">Edit</a></li>
     {% endif %}
 </ul>
+<div class="modal" id="upload_dialog" tabindex="-1" role="dialog" aria-labelledby="upload_dialog_label" aria-hidden="true">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3>Upload Data</h3>
+    </div>
+    <div class="modal-body">
+        <div id="upload">
+            <input id="fileupload" type="file" name="files[]" data-url="/upload/{{ project.project.id }}/{{ entry_id }}/" multiple>
+        </div>
+        <div id="uploaded">
+            
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+    </div>
+</div>
 <div id="entry_tabs_content" class="tab-content">
     <div id="detail" class="tab-pane fade{% if not edit %} in active{% endif %}">
         <div class="page-header"><h3>{{ project.get_entry(entry_id)['name'] }}</h3></div> 
         <div class="well">
             {{ project.get_entry(entry_id)['description'] }}
+        </div>
+        <div id="upload_control">
+            <a href="upload_dialog" role="button" class="btn" data-toggle="modal">Upload File</a>
         </div>
         <div id="entry_stats">
             <dl class="dl-horizontal">
@@ -99,14 +119,36 @@
 </div>
 {% endblock %}
 {% block extra_js %}
+<script src="/static/js/bootstrap-modal.js"></script>
 <script src="/static/js/bootstrap-tab.js"></script>
 <script src="/static/js/bootstrap-scrollspy.js"></script>
+<script src="/static/js/jquery.js"></script>
+<script src="/static/js/vendor/jquery.ui.js"></script>
+<script src="/static/js/jquery.fileupload.js"></script>
 <script>
     $(function(){
         $('#entry_tabs a').click(function(e){
             e.preventDefault();
             $(this).tab('show');
         });
+        // add option
+        $("#fileupload").fileupload({
+            dataType:'json',
+            add:  function(e,data){
+               $.each(data.files, function(index,file){
+                   $('#uploaded').append(file.name)
+               }
+            },
+            progressall: function(e,data){
+                var progress = parseInt(data.loaded / data.total * 100, 10);
+            },
+            done: function(e,data){
+               $.each(data,function(idx){
+                   $('#uploaded').append(idx.url);
+               }
+            }
+        });
+        // don't bother with UI now, we just add a upload button
     });
 </script>
 {% endblock %}

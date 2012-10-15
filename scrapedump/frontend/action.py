@@ -97,28 +97,59 @@ def project_entry_detail(project_id,entry_id):
     # not to mention we will need a project detail
     return render_template('entry_view.html',project=project,form=form,edit=edit,entry_id=entry_id)
 
-@frontend.route('/project/upload/<project_id>/<entry_id>/',methods=['POST'])
+@frontend.route('/upload/<project_id>/<entry_id>/',methods=['POST'])
 @login_required
-def load_data_upload(project_id,entry_name):
-    uploaded = request.File['data_file']
+def load_data_upload(project_id,entry_id):
+    # This should return json
+    # look at jquery-upload
+    uploads = request.files.getlist('data_file')
     project = Project()
     project.get(project_id)
-    # project load_datafile should return file_id
-    file_id = project.load_datafile(uploaded)
+    # project add_datafile should return file_id
+    uploaded_all = []
+    # first what if it is a invalid file, 
+    # second what if it failed
+    for uploaded in uploads:
+        file_id = project.add_datafile(entry_id,uploaded)
+        # because we need get the metadata needed 
+        # delay execution
+        task_id = loader_task(project_name,entry_name,file_id)
+        project.set_load_worker(entry_id,file_id,task_id)
+        # one more thing, jquery upload require json response
+        # they will also need a view to get the file 
+        get_url = '/download/%s/%s/' % (project_id,entry_id)
+        delete_url = '/delete/%s/%s/' % (project_Id,entry_id)
+        data = {
+            'file_id':file_id,
+            'length':test_file.length,
+            'name':test_file.name,
+            'content-type':test_file.content_type,
+            'url':get_url,
+            'delete':delete_url
+        }
+        uploaded_all.append(data)
     
-    task_id = loader_task(project_name,entry_name,file_id)
-    project.add_loadworker(task_id)
-    # one more thing, jquery upload require json response
-    # they will also need a view to get the file 
-    return redirect('/project/%s/' % project_name)
+    return jsonify(uploaded_all)
 
-@frontend.route('/project/download/<project_id>/<file_id>/',methods=['GET'])
-def get_data_upload(project_id,entry_name,file_id):
+@frontend.route('/download/<project_id>/<file_id>/',methods=['GET'])
+def get_data_upload(project_id,file_id):
     # this will allow download of the file. 
     project = Project()
     project.get(project_id)
-    project.find(project_name.replace('_',' '))
     return response(project.get_datafile(file_id)) 
+
+@frontend.route('/delete/project_id/file_id/',methods=['POST'])
+def delete_data_upload(project_id,entry_id,file_id):
+    project = Project()
+    project.get(project_id)
+    try:
+        project.delete_datafile(entry_id,file_id) 
+        status = {'status':'Success','message':'completed'}
+    except:
+        status = {'status':'Failed','message':'error deleting file'}
+        
+    
+    return jsonify([status])
 
 @frontend.route('/settings/',methods=['POST','GET'])
 @login_required
@@ -141,7 +172,7 @@ def register():
         
     return render_template('register.html',form=form)
 
-@frontend.route('/entry/<project_id>/<entry>',methods=['POST','GET'])
+@frontend.route('/entry/<project_id>/<entry>/',methods=['POST','GET'])
 def get_entry(project_id,entry):
     form = EntryUpdateForm()
     edit = False

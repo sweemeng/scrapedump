@@ -197,6 +197,13 @@ class Project(object):
             entry_.insert(data)
         datasource['loaded'] = True
     
+    def delete_datafile(self,entry_id,file_id):
+        db = self.get_db()
+        fs = gridfs.GridFS(db)
+        fs.delete(file_id)
+        del self.input_file[entry_id][file_id]
+        self.save()
+    
     def load_completed(self,entry_id,file_id):
         datasource = self.project.input_file[entry_id][file_id]
         if not datasource['loaded']:
