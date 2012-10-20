@@ -118,8 +118,8 @@ def load_data_upload(project_id,entry_id):
         file_id = project.add_datafile(entry_id,uploaded)
         # because we need get the metadata needed 
         # delay execution
-        task_id = loader_task(project_id,entry_id,file_id)
-        project.set_load_worker(entry_id,file_id,task_id)
+        task_id = loader_task.delay(project_id,entry_id,file_id)
+        project.set_load_worker(entry_id,file_id,task_id.id)
         #project.load_datafile(entry_id,file_id)
         test_file = project.get_datafile(file_id)
         # one more thing, jquery upload require json response
