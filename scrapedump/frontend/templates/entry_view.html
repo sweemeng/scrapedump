@@ -1,7 +1,33 @@
 {% extends "base.html" %}
 {% block title %}Entry {% endblock %}
 {% block extra_header %}
-
+<style rel="stylesheet">
+#dropzone{
+    background: palegreen;
+    width: 150px;
+    height: 50px;
+    line-height: 50px;
+    text-align: center;
+    font-weight: bold;
+}
+#dropzone.in{
+    width: 600px;
+    height: 200px;
+    line-height: 200px;
+    font-size: larger;
+}
+#dropzone.hover{
+    background: lawngreen;
+}
+#dropzone.fade{
+    -webkit-transition: all 0.3s ease-out;
+    -moz-transition: all 0.3s ease-out;
+    -ms-transition: all 0.3s ease-out;
+    -o-transition: all 0.3s ease-out;
+    transition: all 0.3s ease-out;
+    opacity: 1;
+}
+</style>
 {% endblock %}
 {% block container %}
 <ul class="nav nav-tabs" id="entry_tabs">
@@ -11,7 +37,7 @@
     <li {% if edit %} class="active" {% endif %}><a href="#edit" data-toggle="tabs">Edit</a></li>
     {% endif %}
 </ul>
-<div class="modal" id="upload_dialog" tabindex="-1" role="dialog" aria-labelledby="upload_dialog_label" aria-hidden="true">
+<div class="modal hide" id="upload_dialog" tabindex="-1" role="dialog" aria-labelledby="upload_dialog_label" aria-hidden="true">
     <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
         <h3>Upload Data</h3>
@@ -20,8 +46,10 @@
         <div id="upload">
             <input id="fileupload" type="file" name="files[]" data-url="/upload/{{ project.project.id }}/{{ entry_id }}/" multiple>
         </div>
-        <div id="uploaded">
-            
+        <div class="fade well" id="dropzone">
+            Drop File Here 
+            <div class="row" id="uploaded">
+            </div>
         </div>
     </div>
     <div class="modal-footer">
@@ -35,7 +63,7 @@
             {{ project.get_entry(entry_id)['description'] }}
         </div>
         <div id="upload_control">
-            <a href="upload_dialog" role="button" class="btn" data-toggle="modal">Upload File</a>
+            <a href="#upload_dialog" role="button" class="btn" data-toggle="modal">Upload File</a>
         </div>
         <div id="entry_stats">
             <dl class="dl-horizontal">
@@ -119,34 +147,52 @@
 </div>
 {% endblock %}
 {% block extra_js %}
+<script src="/static/js/jquery.js"></script>
+<script src="/static/js/vendor/jquery.ui.widget.js"></script>
+<script src="/static/js/jquery.iframe-transport.js"></script>
+<script src="/static/js/jquery.fileupload.js"></script>
+<script src="/static/js/mustache.js"></script>
 <script src="/static/js/bootstrap-modal.js"></script>
 <script src="/static/js/bootstrap-tab.js"></script>
 <script src="/static/js/bootstrap-scrollspy.js"></script>
-<script src="/static/js/jquery.js"></script>
-<script src="/static/js/vendor/jquery.ui.js"></script>
-<script src="/static/js/jquery.fileupload.js"></script>
+
+{% raw %}
+<script id="uploadedTpl" type="text/template">
+<div id={{name}} class="row">
+    <div class="span3">{{name}}</div>
+    <div class="progress span6" style="width: 0"></div>
+</div>
+</script>
+{% endraw %}
 <script>
     $(function(){
         $('#entry_tabs a').click(function(e){
             e.preventDefault();
             $(this).tab('show');
         });
+        $(document).bind('drop dragover',function(e){
+            e.preventDefault();
+        });
+        $('#upload_dialog').modal({show:false});
         // add option
         $("#fileupload").fileupload({
             dataType:'json',
+            dropZone:$('#dropzone'),
             add:  function(e,data){
                $.each(data.files, function(index,file){
-                   $('#uploaded').append(file.name)
-               }
+                   var template = $("#uploadedTpl").html();
+                   var html = Mustache.to_html(template,file);
+                   $('#uploaded').append(html);
+               });
+               data.submit()
             },
-            progressall: function(e,data){
-                var progress = parseInt(data.loaded / data.total * 100, 10);
-            },
-            done: function(e,data){
-               $.each(data,function(idx){
-                   $('#uploaded').append(idx.url);
-               }
+            progress: function(e,data){
+                $.each(data.files, function(index,file){
+                    var progress = parseInt(file.loaded / file.total * 100, 10);
+                    $('#'+file.name).find('div.progress').css('width:',progress+'%');
+                });
             }
+            
         });
         // don't bother with UI now, we just add a upload button
     });

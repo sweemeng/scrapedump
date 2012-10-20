@@ -3,6 +3,7 @@ from flask import render_template
 from flask import flash
 from flask import redirect
 from flask import request
+from flask import jsonify
 from flask.ext.login import login_required
 from flask.ext.login import current_user
 from flask.ext.wtf import TextField
@@ -102,7 +103,9 @@ def project_entry_detail(project_id,entry_id):
 def load_data_upload(project_id,entry_id):
     # This should return json
     # look at jquery-upload
-    uploads = request.files.getlist('data_file')
+    print "getting upload"
+    uploads = request.files.getlist('files[]')
+    print "file length: %d" % len(uploads)
     project = Project()
     project.get(project_id)
     # project add_datafile should return file_id
@@ -113,7 +116,7 @@ def load_data_upload(project_id,entry_id):
         file_id = project.add_datafile(entry_id,uploaded)
         # because we need get the metadata needed 
         # delay execution
-        task_id = loader_task(project_name,entry_name,file_id)
+        task_id = loader_task(project_id,entry_id,file_id)
         project.set_load_worker(entry_id,file_id,task_id)
         # one more thing, jquery upload require json response
         # they will also need a view to get the file 

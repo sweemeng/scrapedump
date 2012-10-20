@@ -1,11 +1,9 @@
 from project.model import Project
-from celery import Celery
+from task_master import task_master
 
-celery = Celery('data_loader',broker='amqp://guest@localhost//')
-
-@celery.task
+@task_master.task
 def loader_task(project,entry,file_id):
     project = Project()
-    project.find(project)
+    project.get(project)
     project.load_datafile(entry,file_id)
     
