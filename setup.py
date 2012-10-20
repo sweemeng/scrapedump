@@ -21,5 +21,6 @@ setup(
         'wsgiref',
         'nose',
         'py-bcrypt',
+        'celery',
         ],
 )
