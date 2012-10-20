@@ -93,6 +93,7 @@ class Project(object):
         temp = {}
         temp.update(self.project.entry[entry_id])
         temp.update(self.project.input_file[entry_id])
+        self.get_stats()
         temp.update(self.project.stats[entry_id])
         return temp 
      
@@ -139,7 +140,7 @@ class Project(object):
         temp = []
         for entry in self.project.stats:
             if entry != 'system.indexes':
-                mongo_model = model.MongoModel(project=self.to_mongo_name(),collection=self.project.stats[entry]['entry'])
+                mongo_model = self.get_entry_collection(entry)
                 temp.append((entry,mongo_model.entries.count()))
                 # save to stats
                 self.project.stats[entry]['count'] = mongo_model.entries.count()

@@ -3,6 +3,7 @@ from flask import render_template
 from flask import flash
 from flask import redirect
 from flask import request
+from flask import Response
 from flask import jsonify
 from flask.ext.login import login_required
 from flask.ext.login import current_user
@@ -18,7 +19,7 @@ from project.model import ProjectList
 from backend.data_loader import loader_task
 from forms.entry import EntryForm
 from forms.entry import EntryUpdateForm
-
+import json
 frontend = Blueprint('frontend',__name__,
                      template_folder='templates')
 
@@ -117,14 +118,14 @@ def load_data_upload(project_id,entry_id):
         file_id = project.add_datafile(entry_id,uploaded)
         # because we need get the metadata needed 
         # delay execution
-        # task_id = loader_task(project_id,entry_id,file_id)
-        # project.set_load_worker(entry_id,file_id,task_id)
-        project.load_datafile(entry_id,file_id)
+        task_id = loader_task(project_id,entry_id,file_id)
+        project.set_load_worker(entry_id,file_id,task_id)
+        #project.load_datafile(entry_id,file_id)
         test_file = project.get_datafile(file_id)
         # one more thing, jquery upload require json response
         # they will also need a view to get the file 
         get_url = '/download/%s/%s/' % (project_id,entry_id)
-        delete_url = '/delete/%s/%s/' % (project_Id,entry_id)
+        delete_url = '/delete/%s/%s/' % (project_id,entry_id)
         data = {
             'file_id':file_id,
             'length':test_file.length,
@@ -135,7 +136,11 @@ def load_data_upload(project_id,entry_id):
         }
         uploaded_all.append(data)
     
-    return jsonify(uploaded_all)
+    data = json.dumps(uploaded_all)
+    resp = Response(data,status=200,mimetype='application/json')
+    resp.headers['Link'] = 'http://localhost:5000'
+    return resp
+
 
 @frontend.route('/download/<project_id>/<file_id>/',methods=['GET'])
 def get_data_upload(project_id,file_id):
@@ -205,5 +210,5 @@ def add_entry(project_id):
         description  = form.description.data
         short_name = form.description.data
         source = form.description.data
-        project.add_entry(name,description,source,short_name=short_name)
+        project.add_entry(name,description,source)
     return render_template('entry_create.html',form=form)

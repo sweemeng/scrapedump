@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 from celery import Celery
 
-task_master = Celery("scrapedump.celery",
+task_master = Celery("scrapedump.task_master",
                 broker='amqp://',
                 backend='amqp://',
                 include=['backend.data_loader'],)
