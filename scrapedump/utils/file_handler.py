@@ -39,14 +39,24 @@ class JsonHandler(object):
 
 def validator(datafile):
     handled_filetype = { 'csv':CSVHandler,'json':JsonHandler }
-    filename = datafile.filename
+    if hasattr(datafile,"filename"):
+        filename = datafile.filename
+    else:
+        filename = datafile.name
+    print "validaiting filename %s" % filename
     filetype = filename.split('.')[-1]
+    print "validating file %s" % filetype
     return filetype in handled_filetype
 
 def handler_factory(datafile):
     handled_filetype = { 'csv':CSVHandler,'json':JsonHandler }
-    filename = datafile.filename
+    if hasattr(datafile,"filename"):
+        filename = datafile.filename
+    else:
+        filename = datafile.name
+    print "processing filename %s" % filename
     filetype = filename.split('.')[-1]
+    print "processing filetype %s" % filetype
     
     if filetype == 'json':
         handler = JsonHandler

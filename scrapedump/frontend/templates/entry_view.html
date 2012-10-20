@@ -46,10 +46,7 @@
         <div id="upload">
             <input id="fileupload" type="file" name="files[]" data-url="/upload/{{ project.project.id }}/{{ entry_id }}/" multiple>
         </div>
-        <div class="fade well" id="dropzone">
-            Drop File Here 
-            <div class="row" id="uploaded">
-            </div>
+        <div class="row" id="uploaded">
         </div>
     </div>
     <div class="modal-footer">
@@ -177,7 +174,6 @@
         // add option
         $("#fileupload").fileupload({
             dataType:'json',
-            dropZone:$('#dropzone'),
             add:  function(e,data){
                $.each(data.files, function(index,file){
                    var template = $("#uploadedTpl").html();

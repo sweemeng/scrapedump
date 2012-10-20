@@ -159,14 +159,15 @@ class Project(object):
     
     def add_datafile(self,entry_id,datafile):
         # have a reliable way to get file size
+        print "saving %s" % datafile.filename
         if not file_handler.validator(datafile):
             raise InvalidFileTypeException('Only CSV/JSON file is handled')
         db = self.get_db()
         fs = gridfs.GridFS(db)
-        if hasattr(datafile,'name'):
-            file_id = fs.put(datafile.read())
-        elif hasattr(datafile,'filename'):
+        if hasattr(datafile,'filename'):
             file_id = fs.put(datafile.read(),filename=datafile.filename)
+        elif hasattr(datafile,'name'):
+            file_id = fs.put(datafile.read(),filename=datafile.name)
         data_file = fs.get(file_id)
         input_files = self.project.input_file
         temp = copy.deepcopy(self.project.input_file_template)    
@@ -174,6 +175,7 @@ class Project(object):
         temp['filesize'] = data_file.length
         input_files[entry_id][str(file_id)] = temp
         self.save()
+        return str(file_id)
     
     def get_datafile(self,file_id):
         # return file
