@@ -233,7 +233,17 @@ class Project(object):
         datasource = self.project.input_file[entry_id][file_id]
         datasource['task_id'] = task_id
         self.save()
-    
+ 
+    def get_fs(self):
+        db = self.get_db()
+        fs = gridfs.GridFS(db)
+        return fs
+       
+    def link_exported_file(self,entry_id,format_,file_id):
+        if entry_id not in self.project.export:
+            self.project.export[entry_id] = {}
+        self.project.export[entry_id][format_]=file_id
+        self.save()
     
 
 class ProjectList(object):
@@ -262,6 +272,7 @@ class ProjectList(object):
             project.get(id)
             temp.append(project)
         return temp
+    
 
 
 class ProjectTemplate(object):
@@ -284,6 +295,8 @@ class ProjectTemplate(object):
             'url':''
         }
         self.task_id = ''
+        self.export = {}
+        # {'entry_id':{'format':'file_id'}}
         self.output_file = []
         self.old_count = []
         # it is a stats not data
