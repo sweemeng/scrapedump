@@ -167,13 +167,17 @@ class Project(object):
         fs = gridfs.GridFS(db)
         if hasattr(datafile,'filename'):
             file_id = fs.put(datafile.read(),filename=datafile.filename)
+            filename = datafile.filename
         elif hasattr(datafile,'name'):
             file_id = fs.put(datafile.read(),filename=datafile.name)
+            filename = datafile.name
         data_file = fs.get(file_id)
         input_files = self.project.input_file
         temp = copy.deepcopy(self.project.input_file_template)    
-        temp['filename'] = datafile.filename 
-        temp['filesize'] = data_file.length
+        temp['name'] = filename
+        temp['size'] = data_file.length
+        temp['download'] = '/download/%s/%s/' % (self.project.id,file_id)
+        temp['delete'] = '/delete/%s/%s/' % (self.project.id,file_id)
         input_files[entry_id][str(file_id)] = temp
         self.save()
         return str(file_id)
@@ -187,9 +191,13 @@ class Project(object):
         file_ = fs.get(ObjectId(file_id))
         return file_
     
-    def list_datafile(self,entry):
-        # do we store an url?
-        pass
+    def get_datafile_metadata(self,entry_id,file_id):
+        temp = self.project.input_file[entry_id][file_id]
+        return temp
+
+    def list_datafile_metadata(self,entry_id):
+        temp = self.project.input_file[entry_id]
+        return temp
     
     def load_datafile(self,entry_id,file_id):
         datasource = self.project.input_file[entry_id][file_id]
@@ -290,10 +298,12 @@ class ProjectTemplate(object):
         self.input_file = {}
         # each entry will be a dict, the key is the gridfs id, 
         self.input_file_template = {
-                'filename':'',
-                'filesize':'',
+                'name':'',
+                'size':'',
                 'task_id':'',
-                'loaded':False
+                'loaded':False,
+                'download':'',
+                'delete':''
             }
 
     def to_mongo(self):
