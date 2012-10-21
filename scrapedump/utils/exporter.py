@@ -1,8 +1,6 @@
-from project.model import ProjectModel
 import csv
 import json
 
-exporters = [FlatCSVExporter,JSONExporter]
 
 class Exporter(object):
     def __init__(self,project):
@@ -56,7 +54,7 @@ class JSONExporter(Exporter):
         """ 
         return True    
 
-    def export(self,entry_id)
+    def export(self,entry_id):
         model = self.project.get_entry_collection(entry_id)
         collections = model.all()
         output = self.fs.new_file()

@@ -1,15 +1,12 @@
 from utils.exporter import JSONExporter
 from utils.exporter import FlatCSVExporter
-from utils.exporter import exporters
 from task_master import task_master
+from project.model import ProjectList
+
 
 @task_master.task
-def run_json_exporter():
-    exporter = JSONExporter()
-    exporter.run()
-
-@task_master.task
-def run_flatcsv_exporter():
-    exporter = FlatCSVExporter
-    exporter.run()
-        
+def run_exporter(exporter):
+    project_list = ProjectList()
+    for project in project_list:
+        exporter = exporter(project)
+        exporter.run()
