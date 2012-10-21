@@ -2,6 +2,8 @@ from project.model import ProjectModel
 import csv
 import json
 
+exporters = [FlatCSVExporter,JSONExporter]
+
 class Exporter(object):
     def __init__(self,project):
         """
@@ -44,7 +46,7 @@ class FlatCSVExporter(Exporter):
         self.project.link_exported_file(entry_id,'csv',output._id)
 
 
-class JsonExporter(Exporter):
+class JSONExporter(Exporter):
     """
         To be honest, not sure if caching it will be really faster
     """
