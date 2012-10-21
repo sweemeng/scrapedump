@@ -174,7 +174,9 @@ class Project(object):
         data_file = fs.get(file_id)
         input_files = self.project.input_file
         temp = copy.deepcopy(self.project.input_file_template)    
-        temp['name'] = filename
+        temp['name'] = filename.replace('.','_')
+        temp['filename'] = filename
+        temp['content-type'] = data_file.content_type
         temp['size'] = data_file.length
         temp['download'] = '/download/%s/%s/' % (self.project.id,file_id)
         temp['delete'] = '/delete/%s/%s/' % (self.project.id,file_id)
@@ -299,6 +301,9 @@ class ProjectTemplate(object):
         # each entry will be a dict, the key is the gridfs id, 
         self.input_file_template = {
                 'name':'',
+                'filename':'',
+                'filetype':'',
+                'content-type':'',
                 'size':'',
                 'task_id':'',
                 'loaded':False,

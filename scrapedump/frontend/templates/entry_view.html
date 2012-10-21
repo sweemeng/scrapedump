@@ -36,6 +36,7 @@
                 <thead>
                     <tr>
                         <th>Filename</th>
+                        <th>Content-type</th>
                         <th>Size</th>
                         <th>Detail</th>
                     </tr>
@@ -44,7 +45,8 @@
 
                 {% for key in project.list_datafile_metadata(entry_id) %}
                         <tr id="{{project.get_datafile_metadata(entry_id,key)['name']}}">
-                            <td>{{project.get_datafile_metadata(entry_id,key)['name']}}</td>
+                            <td>{{project.get_datafile_metadata(entry_id,key)['filename']}}</td>
+                            <td>{{project.get_datafile_metadata(entry_id,key)['content-type']}}</td>
                             <td>{{project.get_datafile_metadata(entry_id,key)['size']}}</td>
                             <td>
                                     <a class="btn btn-primary" href="{{project.get_datafile_metadata(entry_id,key)['download']}}">download</a>
@@ -143,22 +145,25 @@
 {% raw %}
 <script id="uploadedTpl" type="text/template">
 <tr id="{{name}}">
-    <td>{{name}}</td>
+    <td>{{filename}}</td>
+    <td>{{content-type}}</td>
     <td>{{size}}</td>
     <td><div class="progress"><div class="bar" style="width: 0"></div></div></td>
 </tr>
 </script>
 
 <script id="uploadedTplFail" type="text/template">
-    <td>{{name}}</td>
+    <td>{{filename}}</td>
+    <td>{{content-type}}</td>
     <td></td>
     <td>{{msg}}</td>
 
 </script>
 
 <script id="uploadedTplDone" type="text/template">
-    <td>{{name}}</td>
-    <td>{{size}}</td>
+    <td>{{filename}}</td>
+    <td>{{content-type}}</td>
+    <td>{{length}}</td>
     <td>
         <a class="btn btn-primary" href="{{download}}">download</a>
         <a class="btn btn-danger" href="{{delete}}">delete</a>
@@ -184,8 +189,16 @@
                console.log("add called");
                $.each(data.files, function(index,file){
                    console.log("adding");
+                   console.log(file)
+                   var template_var = {};
+           
+                   temp = file.name.replace('.','_');
+                   template_var['name'] = temp
+                   template_var['filename'] = file.name
+                   template_var['size'] = file.size
+                   
                    var template = $("#uploadedTpl").html();
-                   var html = Mustache.to_html(template,file);
+                   var html = Mustache.to_html(template,template_var);
                    $('#uploaded table tbody').append(html);
                });
                data.submit()

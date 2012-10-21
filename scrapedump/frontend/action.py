@@ -119,7 +119,9 @@ def load_data_upload(project_id,entry_id):
             file_id = project.add_datafile(entry_id,uploaded)
         except:
             data = {
-                'name':uploaded.filename,
+                'filename':uploaded.filename,
+                'name':uploaded.filename.replace('.','_'),
+                'content-type':uploaded.content_type,
                 'msg':'Invalid File Type, only CSV/Json are supported',
                 'success':False
             }
@@ -131,7 +133,9 @@ def load_data_upload(project_id,entry_id):
             project.set_load_worker(entry_id,file_id,task_id.id)
         except:
             data = {
-                'name':uploaded.filename,
+                'name':uploaded.filename.replace('.','_'),
+                'filename':uploaded.filename,
+                'content-type':uploaded.content_type,
                 'msg':'Problem processing file',
                 'success':False,
             }
@@ -147,7 +151,8 @@ def load_data_upload(project_id,entry_id):
             'msg':'',
             'file_id':file_id,
             'length':test_file.length,
-            'name':test_file.name,
+            'name':test_file.name.replace('.','_'),
+            'filename':test_file.name,
             'content-type':test_file.content_type,
             'url':get_url,
             'delete':delete_url
