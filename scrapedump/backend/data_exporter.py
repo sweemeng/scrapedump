@@ -7,6 +7,6 @@ from project.model import ProjectList
 @task_master.task
 def run_exporter(exporter):
     project_list = ProjectList()
-    for project in project_list:
+    for project in project_list.all():
         exporter = exporter(project)
         exporter.run()

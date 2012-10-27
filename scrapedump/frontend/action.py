@@ -5,6 +5,7 @@ from flask import redirect
 from flask import request
 from flask import Response
 from flask import jsonify
+from flask import make_response
 from flask.ext.login import login_required
 from flask.ext.login import current_user
 from flask.ext.wtf import TextField
@@ -165,12 +166,18 @@ def load_data_upload(project_id,entry_id):
     return resp
 
 
-@frontend.route('/download/<project_id>/<file_id>/',methods=['GET'])
-def get_data_upload(project_id,file_id):
+@frontend.route('/download/<project_id>/<entry_id>/<file_id>/',methods=['GET'])
+def get_data_upload(project_id,entry_id,file_id):
     # this will allow download of the file. 
     project = Project()
     project.get(project_id)
-    return response(project.get_datafile(file_id)) 
+    metadata = project.get_datafile_metadata(entry_id,file_id)
+    response = make_response(project.get_datafile(file_id).read())
+    response.headers['Content-Description'] = 'Uploaded File'
+    response.headers['Content-Type'] = 'application/%s' % metadata['filename'].split('.')[-1]
+    response.headers['Content-Length'] = metadata['size']
+    response.headers['Content-Disposition'] = 'attachment; filename=%s' % metadata['filename']
+    return response 
 
 @frontend.route('/delete/project_id/file_id/',methods=['POST'])
 def delete_data_upload(project_id,entry_id,file_id):
@@ -217,8 +224,8 @@ def get_entry(project_id,entry):
         source = form.source.data
         project.get(project_id)
         project.update_entry(entry,description,source)
-        pass
-    project - Project()
+        return redirect('/entry/%s/%s/' % (project_id,entry))
+    project = Project()
     project.find(project_name)
     return render_template('entry_view.html',project=project,entry=entry,
                            edit=edit,form=form)
@@ -234,4 +241,19 @@ def add_entry(project_id):
         short_name = form.description.data
         source = form.description.data
         project.add_entry(name,description,source)
+        return redirect('/project/%s' % project_id)
     return render_template('entry_create.html',form=form)
+
+@frontend.route('/export/<project_id>/<entry_id>/<export_type>/')
+def download_export(project_id,entry_id,export_type):
+    project = Project()
+    project.get(project_id)
+    metadata = project.get_exported_file(entry_id)
+    file_ = project.get_datafile(str(metadata[export_type]))
+    response = make_response(file_.read())
+    response.headers['Content-Description'] = 'Uploaded File'
+    response.headers['Content-Type'] = 'application/%s' % file_.content_type
+    response.headers['Content-Length'] = file_.length
+    response.headers['Content-Disposition'] = 'attachment; filename=%s' % file_.filename
+    return response 
+

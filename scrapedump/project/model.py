@@ -166,11 +166,21 @@ class Project(object):
         db = self.get_db()
         fs = gridfs.GridFS(db)
         if hasattr(datafile,'filename'):
-            file_id = fs.put(datafile.read(),filename=datafile.filename)
             filename = datafile.filename
+            
         elif hasattr(datafile,'name'):
-            file_id = fs.put(datafile.read(),filename=datafile.name)
             filename = datafile.name
+
+	if filename.split('.')[-1] == 'json':
+            content_type = 'application/json'
+        elif filename.split('.')[-1] == 'csv':
+            content_type = 'application/csv'
+        elif filename.split('.')[-1] == 'tsv':
+            content_type = 'application/csv'
+        else:
+            raise InvalidFileTypeException('Only CSV/JSON file is handled')
+
+        file_id = fs.put(datafile.read(),filename=filename,content_type=content_type)
         data_file = fs.get(file_id)
         input_files = self.project.input_file
         temp = copy.deepcopy(self.project.input_file_template)    
@@ -178,7 +188,7 @@ class Project(object):
         temp['filename'] = filename
         temp['content-type'] = data_file.content_type
         temp['size'] = data_file.length
-        temp['download'] = '/download/%s/%s/' % (self.project.id,file_id)
+        temp['download'] = '/download/%s/%s/%s/' % (self.project.id,entry_id,file_id)
         temp['delete'] = '/delete/%s/%s/' % (self.project.id,file_id)
         input_files[entry_id][str(file_id)] = temp
         self.save()
@@ -243,7 +253,11 @@ class Project(object):
         if entry_id not in self.project.export:
             self.project.export[entry_id] = {}
         self.project.export[entry_id][format_]=file_id
+        print 'saving result'
         self.save()
+    
+    def get_exported_file(self,entry_id):
+        return self.project.export[entry_id]
     
 
 class ProjectList(object):
@@ -335,6 +349,7 @@ class ProjectTemplate(object):
         data['input_file'] = self.input_file
         data['stats'] = self.stats
         data['entry'] = self.entry
+        data['export'] = self.export
         return data
     
     def from_mongo(self,data):

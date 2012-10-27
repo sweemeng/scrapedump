@@ -19,6 +19,19 @@
         <div class="well">
             {{ project.get_entry(entry_id)['description'] }}
         </div>
+        <div id="export">
+            <div class="btn-group">
+                <a class="btn btn-primary dropdown-toggle" data-toggle="dropdown" href="#">
+                    Export to...
+                    <span class="caret"></span>
+                </a>
+                <ul class="dropdown-menu">
+                    {% for key in project.get_exported_file(entry_id) %}
+                        <li><a href="/export/{{project.project.id}}/{{entry_id}}/{{key}}/">{{key}}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
         <div id="entry_stats">
             <dl class="dl-horizontal">
                 <dt>Count:</dt>

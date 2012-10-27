@@ -31,13 +31,11 @@
             <tr>
                 <th>Entry</th>
                 <th>Counts</th>
-                <th>Data Dump</th>
             <tr>
             {% for key,value in project.get_stats().items() %}
             <tr>
                 <td><a href="/entry/{{project.project.id}}/{{value.entry}}/">{{ project.project.entry[value.entry]['name'] }}</a></td>
                 <td>{{ value.count }}</td>
-                <td><a href="/api/db/{{project.project.id}}/{{value.entry}}/">Raw Dump</a></td>
             </tr>
             {% endfor %}
         </table>
