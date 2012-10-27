@@ -1,7 +1,7 @@
 from project.model import Project
-from task_master import task_master
+from task_master import celery
 
-@task_master.task
+@celery.task
 def loader_task(project_id,entry,file_id):
     project = Project()
     project.get(project_id)
