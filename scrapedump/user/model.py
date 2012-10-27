@@ -94,6 +94,13 @@ class User(object):
         if data:
             self.save()
 
+    def set_role(self,name):
+        self.user.roles.append(name)
+        self.save()
+    
+    def get_role(self):
+        return self.user.roles
+
     def save(self):
         if self.user.id:
             self.model.update({'_id':ObjectId(str(self.user.id))},self.user.to_mongo())
@@ -110,6 +117,7 @@ class UserTemplate(object):
         self.project = []
         self.active = False
         self.auth_token = ''
+        self.roles = []
 
     def to_mongo(self):
         data = {}
@@ -119,6 +127,7 @@ class UserTemplate(object):
         data['project'] = self.project
         data['active'] = self.active
         data['auth_token'] = self.auth_token
+        data['roles'] = self.roles
         return data
     
     def from_mongo(self,data):

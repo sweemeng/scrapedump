@@ -6,13 +6,18 @@ from flask.ext.login import LoginManager
 from flask.ext.login import login_user
 from flask.ext.login import logout_user
 from flask.ext.login import login_required
+from flask.ext.principal import identity_loaded
 from forms.login import LoginForm
 from flask import flash
 
 from api.data import DataApi
 from project.api import ProjectApi
 from user.model import User
+from user.permission import admin_permission
+from user.permission import user_permission
+from user.permission import EditProjectPermission
 from frontend.action import frontend
+
 
 app = Flask(__name__)
 
@@ -26,6 +31,18 @@ login_manager.setup_app(app)
 def load_user(userid):
     user = User()
     return user.get(userid)
+
+@identity_loaded.connect_via(app)
+def on_identity_loaded(sender,identity):
+    identity.user = current_user
+
+    identity.provides.add(UserNeed(current_user.id))
+
+    for role in current_user.roles:
+        identity.provides.add(RoleNeed(role))
+    
+    for document in current_user.documents:
+        identity.provides.add(edit_project_need(project))
 
 @frontend.route('/login/',methods=['GET','POST'])
 def login():
