@@ -2,9 +2,10 @@ from flask.ext.principal import Principal, Permission, RoleNeed
 from flask.ext.principal import UserNeed
 from flask.ext.principal import identity_loaded
 from functools import partial
+from collections import namedtuple
 
-project_need = namedtuple('document',['method','value'])
-edit_project_need = partial(document_need,'need')
+project_need = namedtuple('project',['method','value'])
+edit_project_need = partial(project_need,'need')
 
 # admin is super user
 admin_permission = Permission(RoleNeed('admin'))

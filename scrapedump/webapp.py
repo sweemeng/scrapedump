@@ -38,7 +38,7 @@ def on_identity_loaded(sender,identity):
 
     identity.provides.add(UserNeed(current_user.id))
 
-    for role in current_user.roles:
+    for role in current_user.get_role():
         identity.provides.add(RoleNeed(role))
     
     for document in current_user.documents:
