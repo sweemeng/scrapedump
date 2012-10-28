@@ -5,6 +5,7 @@ from model import Project
 from model import ProjectList
 from mongomodel.model import MongoModel
 from user.model import User
+from utils.authorization import authorized
 import bson
 import bson.objectid as objectid
 import bson.json_util
@@ -49,14 +50,12 @@ class ProjectApi(MethodView):
         data = request.json
         project = Project()
         project.create(data['name'],data['description'])
-        user.add_project(project.project.name_to_mongo())
+        user.add_project(str(project.get_id()))
         return jsonify({'status':True})
     
     def put(self,project_id):
         api_key = request.args.get('api_key')
-        user = User()
-        user.api_login(api_key)
-        if not user.is_authenticated():
+        if not authorized(api_key,project_id):
             return jsonify({'status':False})
 
         project = Project()
@@ -80,9 +79,7 @@ class ProjectApi(MethodView):
     
     def delete(self,project_id):
         api_key = request.args.get('api_key')
-        user = User()
-        user.api_login(api_key)
-        if not user.is_authenticated():
+        if not authorized(project_id,api_key):
             return jsonify({'status':False})
 
         project = Project()
