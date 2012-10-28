@@ -26,13 +26,19 @@ def teardown_test_get():
 def setup_user():
     user = User()
     user.create('test_user','test_pass','test@example.com')
-    user.add_project('scraped')
+    project = Project()
+    project.create('scraped','scraped')
+    project.add_entry('entry','entry','localhost')
+    user.add_project(project.get_id())
 
 def teardown_user():
     user = User()
     user.login('test_user','test_pass')
     model = MongoModel(project=user.project,collection=user.collection)
     model.delete({'_id':objectid.ObjectId(str(user.user.id))})
+    model = MongoModel(project='internal',collection='project')
+    model.delete({'name':'scraped'})
+
 
 @with_setup(setup_test_get,teardown_test_get)
 def test_get_all():
@@ -85,33 +91,41 @@ def test_insert():
     mongo.delete(check[0])
 
 def setup_test_update():
-    mongo = MongoModel(project='scraped',collection='entry')
+    mongo = MongoModel(project='test_api_update',collection='test_api_entry')
     mongo.insert({'a':1})
     user = User()
-    user.create('test_user','test_pass','test@example.com')
-    user.add_project('scraped')
+    user.create('test_user_api_update','test_pass','test@example.com')
+    project = Project()
+    project.create('test api update','scraped')
+    project.add_entry('test api entry','entry','localhost')
+    user.add_project(project.get_id())
 
 
 def teardown_test_update():
-    mongo = MongoModel(project='scraped',collection='entry')
+    mongo = MongoModel(project='test_api_update',collection='test_api_entry')
     mongo.delete({'a':2})
     user = User()
-    user.login('test_user','test_pass')
+    user.login('test_user_api_update','test_pass')
     model = MongoModel(project=user.project,collection=user.collection)
     model.delete({'_id':objectid.ObjectId(str(user.user.id))})
+    model = MongoModel(project='internal',collection='project')
+    model.delete({'name':'test api update'})
 
 
 @with_setup(setup_test_update,teardown_test_update)
 def test_update():
     user = User()
-    user.login('test_user','test_pass')
+    user.login('test_user_api_update','test_pass')
     api_key = user.user.auth_token
 
     project = Project()
-    project.find('scraped')
-    entry_id = project.find_entry('entry')
-    mongo = MongoModel(project='scraped',collection='entry')
+    project.find('test api update')
+    entry_id = project.find_entry('test api entry')
+    print user.get_project()
+    print project.get_id()
+    mongo = MongoModel(project='test_api_update',collection='test_api_entry')
     data = mongo.query({'a':1})
+    print data
     id = str(data['_id'])
     updated = {'a':2}
     url = '/api/db/%s/%s/%s/?api_key=%s' % (project.project.id,entry_id,id,api_key) 
@@ -119,10 +133,11 @@ def test_update():
     client = webapp.app.test_client()
     response = client.put(url, data = json.dumps(updated),
             content_type='application/json')
-
+    print response.data
     status = json.loads(response.data)
-
+    
     assert status['status']
+  
     updated_data = mongo.query({'_id':objectid.ObjectId(id)})
     assert updated_data['a'] == 2
 

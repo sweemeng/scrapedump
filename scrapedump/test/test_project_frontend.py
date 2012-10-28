@@ -60,6 +60,7 @@ def setup_project_update():
     user.create('test_update_user','test_password','test@example.com')
     project = Project()
     project.create('project update','test project update')
+    user.add_project(project.get_id())
     project.add_entry('data','test data','data')
 
 def teardown_project_update():
@@ -82,6 +83,7 @@ def test_project_update():
     project_ui = test_client.post('/project/%s/' % project.project.id,data={
         'description':'project updated',
     },follow_redirects=True) 
+    print project_ui.data
     
     assert 'project updated' in project_ui.data
     assert 'data' in project_ui.data

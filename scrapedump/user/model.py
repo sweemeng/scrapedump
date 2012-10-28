@@ -25,6 +25,7 @@ class User(object):
         return self
     
     def api_login(self,auth_token):
+        print 'auth_token is %s'%auth_token
         temp = self.model.query({'auth_token':auth_token})
         if temp:
             self.user.from_mongo(temp)
@@ -68,11 +69,12 @@ class User(object):
         return self.user.project
 
     def add_project(self,project):
-        self.user.project.append(project)
+        if project not in self.user.project:
+            self.user.project.append(project)
         self.save()
     
     def remove_project(self,project):
-        self.user.project.remove(project.replace(' ','_'))
+        self.user.project.remove(project)
         self.save()
     
     def update(self,password=None,email=None):

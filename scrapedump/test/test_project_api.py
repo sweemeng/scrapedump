@@ -103,13 +103,18 @@ def test_project_create():
     test_user = User()
     test_user.login('test_user','test_pass')
     print test_user.user.project
-    assert 'project create'.replace(' ','_') in test_user.user.project
+    registered = False
+    for i in project.all():
+        if i.get_id() in test_user.get_project():
+            registered = True
+    assert registered, "project not in user project"
+       
     exist = False
     for i in project.all():
         
         if 'project create' == i.project.name:
             exist = True
-    assert exist
+    assert exist, "project created"
     
     # now delete it
     project = Project()
@@ -118,14 +123,14 @@ def test_project_create():
 
 def setup_project_delete():
     user = User()
-    user.create('test_user_delete','test_pass','test@example.com')
+    user.create('test_user_delete_api_project','test_pass','test@example.com')
     project = Project()
     project.create('project 1','project content 1')
-    user.add_project('project_1')
+    user.add_project(project.get_id())
 
 def teardown_project_delete():
     user = User()
-    user.login('test_user_delete','test_pass')
+    user.login('test_user_delete_api_project','test_pass')
     project = Project()
     model = MongoModel(project=user.project,collection=user.collection)
     model.delete({'_id':ObjectId(user.user.id)})
@@ -138,10 +143,13 @@ def teardown_project_delete():
 def test_project_delete():
     # login user get token
     user = User()
-    user.login('test_user_delete','test_pass')
+    user.login('test_user_delete_api_project','test_pass')
+    
     api_key = user.user.auth_token
+    print api_key
     project = Project()
     project.find('project 1')
+    project_id = project.get_id()
     # do a delete
     test_client = webapp.app.test_client()
     url = '/api/project/%s/?api_key=%s' % (project.project.id,api_key)
@@ -155,24 +163,24 @@ def test_project_delete():
 
     test_user = User()
     test_user.login('test_user_delete','test_pass')
-    assert 'project_1' not in test_user.user.project
+    assert project_id not in test_user.user.project
 
     
 
 def setup_user_project():
     # now create user
     user = User()
-    user.create('test_user_update','test_pass','test@example.com') 
+    user.create('test_user_update_project','test_pass','test@example.com') 
     # create project
     project = Project()
     project.create('project update','project update content')
     # associate project
-    user.add_project('project_update')
+    user.add_project(project.get_id())
 
 def teardown_user_project():
     user = User()
     model = MongoModel(project=user.project,collection=user.collection)
-    model.delete({'username':'test_user_update'})
+    model.delete({'username':'test_user_update_project'})
     project = Project()
     model = MongoModel(project=project.project_,collection=project.collection_)
     model.delete({'name':'project update'})
@@ -181,7 +189,7 @@ def teardown_user_project():
 @with_setup(setup_user_project,teardown_user_project)
 def test_project_update():
     user = User()
-    user.login('test_user_update','test_pass')
+    user.login('test_user_update_project','test_pass')
     api_key = user.user.auth_token
     project = Project()
     project.find('project update')
@@ -190,6 +198,7 @@ def test_project_update():
     data = json.dumps({'description':'project updated content'})
     result = test_client.put(url,data=data,content_type='application/json')
     status = json.loads(result.data)
+    print status
     assert status['status']
     
     project=Project()
@@ -203,13 +212,13 @@ def setup_user_project_list():
     user.create('test_user_list','test_pass','test@example.com')
     project = Project()
     project.create('project list 1','project content 1')
+    user.add_project(project.get_id())
     project = Project()
     project.create('project list 2','project content 2')
+    user.add_project(project.get_id())
     project = Project()
     project.create('project list 3','project content 3')
-    user.add_project('project_list_1')
-    user.add_project('project_list_2')
-    user.add_project('project_list_3')
+    user.add_project(project.get_id())
 
 def teardown_user_project_list():
     user = User()
@@ -254,19 +263,20 @@ def test_user_project_join():
     result = test_client.put(url,data=json.dumps(data),content_type='application/json')
     user.login('test_user_list','test_pass')
     print user.user.project
-    assert 'project_list_3' in user.user.project
+    assert str(project.get_id()) in user.user.project
 
 @with_setup(setup_user_project_list,teardown_user_project_list)
 def test_user_project_withdraw():
     user = User()
     user.login('test_user_list','test_pass') 
-    user.add_project('project_list_3')
-    api_key = user.user.auth_token
-    test_client = webapp.app.test_client()
     project = Project()
     project.find('project list 3')
 
-    url = '/api/project/%s/?api_key=%s' % (project.project.id,api_key)
+    user.add_project(project.get_id())
+    api_key = user.user.auth_token
+    test_client = webapp.app.test_client()
+
+    url = '/api/project/%s/?api_key=%s' % (project.get_id(),api_key)
        
     data = {'project':'project_list_3','action':'withdraw'}
 
@@ -274,6 +284,8 @@ def test_user_project_withdraw():
     print result.data 
     user.login('test_user_list','test_pass')
     print user.user.project
-    assert not 'project_list_3' in user.user.project
+    print project.get_id()
+    print project.project.name
+    assert not str(project.get_id()) in user.user.project
 
 

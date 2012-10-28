@@ -25,7 +25,6 @@ class ProjectApi(MethodView):
             project = ProjectList()
             all_project = []
             for p in project.all():
-                print p.project.to_mongo()
                 all_project.append(p.project.to_mongo())
             data['all'] = all_project
                 
@@ -55,23 +54,24 @@ class ProjectApi(MethodView):
     
     def put(self,project_id):
         api_key = request.args.get('api_key')
-        if not authorized(api_key,project_id):
-            return jsonify({'status':False})
-
         project = Project()
         project.get(project_id)
-        
+        user = User()
+        user.api_login(api_key)
         data = request.json
-        
+                
         if data.get('action') == 'join':
-            user.add_project(project.project.name_to_mongo())
-            return jsonify({'status':True})
+            user.add_project(project.get_id())
+            return jsonify({'status':True,'msg':'join project'})
         elif data.get('action') == 'withdraw':
-            user.remove_project(project.project.name_to_mongo())
-            return jsonify({'status':True})
+            user.remove_project(project.get_id())
+            return jsonify({'status':True,'msg':'withdrawn from project'})
             
-        if not project.project.name_to_mongo() in user.user.project:
-            return jsonify({'status':False})
+        if not authorized(api_key,project_id):
+            return jsonify({'status':False,'msg':'unauthorized'})
+
+        if not project.get_id() in user.user.project:
+            return jsonify({'status':False,'msg':'project not in user'})
         
         project.project.description = data['description']
         project.save()
@@ -79,14 +79,15 @@ class ProjectApi(MethodView):
     
     def delete(self,project_id):
         api_key = request.args.get('api_key')
-        if not authorized(project_id,api_key):
+        if not authorized(api_key,project_id):
             return jsonify({'status':False})
-
+        user = User()
+        user.api_login(api_key)
         project = Project()
         project.get(project_id)
-        if not project.project.name_to_mongo() in user.user.project:
+        if not project.get_id() in user.user.project:
             return jsonify({'status':False})
-        user.remove_project(project.project.name_to_mongo())
+        user.remove_project(project.get_id())
         model = MongoModel(project=project.project_,collection=project.collection_)
         model.delete({'_id':objectid.ObjectId(str(project_id))})
         
