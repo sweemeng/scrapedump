@@ -44,6 +44,9 @@ class Project(object):
         result = self.model.query({'_id':ObjectId(str(id_))})
         self.project.from_mongo(result)
         return self
+    
+    def get_id(self):
+        return str(self.project.id)
 
     def find(self,name):
         result = self.model.query({'name':name})

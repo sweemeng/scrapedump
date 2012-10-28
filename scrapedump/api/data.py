@@ -1,16 +1,21 @@
 from flask.views import MethodView
 from flask import jsonify
+from flask.ext.principal import Identity
 
 from mongomodel.model import MongoModel
 from user.model import User
+from user.permission import EditProjectPermission
+from user.permission import edit_project_need
 from project.model import Project
-
+from utils.authorization import authorized
 import  bson
 import bson.objectid as objectid
 import bson.json_util
 from flask import json
 from flask import request
 from flask import Response
+from flask import abort
+
 
 # Now integrate with project, now it should be project_id, entry_id, not name. 
 class DataApi(MethodView):
@@ -31,10 +36,8 @@ class DataApi(MethodView):
 
     def post(self,project_id,entry):
         api_key = request.args.get('api_key')
-        user = User()
         
-        user.api_login(api_key)
-        if not user.is_authenticated():
+        if not authorized(api_key,project_id):
             return jsonify({'status':False,'message':'user is not authenticated'})
         
         # Lets disable it for now. Until flask-principal is implemented
@@ -50,9 +53,7 @@ class DataApi(MethodView):
 
     def put(self,project_id,entry,entry_id):
         api_key = request.args.get('api_key')
-        user = User()
-        user.api_login(api_key)
-        if not user.is_authenticated():
+        if not authorized(api_key,project_id):
             return jsonify({'status':False})
 
         #if project not in user.user.project:
@@ -70,9 +71,7 @@ class DataApi(MethodView):
 
     def delete(self,project_id,entry,entry_id):
         api_key = request.args.get('api_key')
-        user = User()
-        user.api_login(api_key)
-        if not user.is_authenticated():
+        if not authorized(api_key,project_id):
             return jsonify({'status':False})
 
         #if project not in user.user.project:
