@@ -21,6 +21,7 @@ from flask import flash
 
 from api.data import DataApi
 from project.api import ProjectApi
+from project.api import EntryApi
 from user.model import User
 from user.permission import admin_permission
 from user.permission import user_permission
@@ -86,6 +87,7 @@ def unauthorized():
 
 api_views = DataApi.as_view('api')
 project_api = ProjectApi.as_view('project')
+entry_api = EntryApi.as_view('entry')
 
 app.add_url_rule('/api/project/',defaults={'project_id':None},
         view_func=project_api,methods=['GET',])
@@ -98,6 +100,12 @@ app.add_url_rule('/api/db/<project_id>/<entry>/',defaults={'entry_id':None},
 app.add_url_rule('/api/db/<project_id>/<entry>/',view_func=api_views,methods=['POST',])
 app.add_url_rule('/api/db/<project_id>/<entry>/<entry_id>/',
         view_func=api_views,methods=['GET','PUT','DELETE',])
+
+app.add_url_rule('/api/entry/<project_id>/',defaults={'entry_id':None},
+        view_func=entry_api,methods=['GET',])
+app.add_url_rule('/api/entry/<project_id>/',view_func=entry_api,methods=['POST',])
+app.add_url_rule('/api/entry/<project_id>/<entry_id>/',
+        view_func=entry_api,methods=['GET','PUT','DELETE',])
 
 
 app.register_blueprint(frontend,url_prefix='')
