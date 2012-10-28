@@ -18,8 +18,8 @@ user_permission = Permission(RoleNeed('user'))
 # but the usecase for this is crowdsource data cleaning
 class EditProjectPermission(Permission):
     def __init__(self,project_id):
-        need = edit_project_need(document_id)
-        super(edit_project_need,self).__init__(need)
+        need = edit_project_need(project_id)
+        super(EditProjectPermission,self).__init__(need)
 
     
     

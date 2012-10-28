@@ -82,6 +82,7 @@ class Project(object):
         self.project.entry[entry_id]['url'] = '/project/%s/%s/' % (name,shortname)
         # remove the space check, we will reference back to this
         self.add_stats(entry_id)
+        self.project.export[entry_id] = {}
         print self.project.to_mongo()
         self.save()
         return entry_id

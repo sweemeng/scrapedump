@@ -6,11 +6,13 @@ from flask import request
 from flask import Response
 from flask import jsonify
 from flask import make_response
+from flask import abort
 from flask.ext.login import login_required
 from flask.ext.login import current_user
 from flask.ext.wtf import TextField
 
 from user.model import User
+from user.permission import EditProjectPermission
 from forms.user import UserForm
 from forms.user import UserUpdateForm
 from forms.project import ProjectForm
@@ -21,6 +23,8 @@ from backend.data_loader import loader_task
 from forms.entry import EntryForm
 from forms.entry import EntryUpdateForm
 import json
+
+
 frontend = Blueprint('frontend',__name__,
                      template_folder='templates')
 
@@ -41,15 +45,18 @@ def project_view(project_id):
     project = Project()
     print project_id
     project.get(project_id)
+    permission = EditProjectPermission(project_id) 
     edit = False
     if request.method == 'POST':
         edit = True
+        if not permission.can():
+            abort(403)
         if form.validate_on_submit():
             # name is not edited because it bind to the database name
             project.project.description = form.description.data
             project.save()
 
-    return render_template('project_view.html',project=project,form=form,edit=edit)
+    return render_template('project_view.html',project=project,form=form,edit=edit,permission=permission)
 
 @frontend.route('/project/',methods=['POST','GET'])
 @login_required
@@ -61,7 +68,7 @@ def project_create():
         project = Project()
         project.create(form.name.data,form.description.data)
         user = current_user
-        user.add_project(project.id)
+        user.add_project(str(project.project.id))
         return redirect('/project/%s/'% project.project.id)
     
     return render_template('project_create.html',form=form)
@@ -72,6 +79,9 @@ def project_entry_create(project_id):
     edit = False
     project = Project()
     project.get(project_id)
+    permission = EditProjectPermission(project_id)
+    if not permission.can():
+        abort(403)
     if form.validate_on_submit():
         name = form.name.data
         description = form.description.data
@@ -85,6 +95,7 @@ def project_entry_create(project_id):
 @frontend.route('/entry/<project_id>/<entry_id>/',methods=['GET','POST'])
 def project_entry_detail(project_id,entry_id):
     # add entry should be a new form, remove from old form
+    permission = EditProjectPermission(project_id)
     form = EntryUpdateForm(csrf_enabled=False)
     # we also will need upload form FYI
     project = Project()
@@ -93,12 +104,14 @@ def project_entry_detail(project_id,entry_id):
     print project.project.entry.keys()
     entry = project.get_entry(entry_id)
     if form.validate_on_submit():
+        if not permission.can():
+            abort(403)
         description = form.description.data
         source = form.source.data
         project.update_entry(entry_id,description,source)
         edit = True
     # not to mention we will need a project detail
-    return render_template('entry_view.html',project=project,form=form,edit=edit,entry_id=entry_id)
+    return render_template('entry_view.html',project=project,form=form,edit=edit,entry_id=entry_id,permission=permission)
 
 @frontend.route('/upload/<project_id>/<entry_id>/',methods=['POST'])
 @login_required

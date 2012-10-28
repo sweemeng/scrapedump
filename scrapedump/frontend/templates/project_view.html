@@ -5,15 +5,17 @@
 {% endblock %}
 {% block container %}
 {% if current_user.is_authenticated() %}
+    {% if permission.can() %}
     <ul class="nav nav-pills">
         <li class="active">
             <a href="/entry/{{ project.project.id }}/">New Entry</a>
         </li>
     </ul>
+    {% endif %}
 {% endif %}
 <ul class="nav nav-tabs" id="project_tabs">
     <li {% if not edit %}class="active"{% endif %}><a href="#detail" data-toggle="tabs">Detail</a></li>
-    {% if current_user.is_authenticated() %}
+    {% if permission.can() %}
     <li {% if edit %} class="active" {% endif %}><a href="#edit" data-toggle="tabs">Edit</a></li>
     {% endif %}
 </ul>
@@ -41,7 +43,7 @@
         </table>
         </section>
     </div>
-    {% if current_user.is_authenticated() %}
+    {% if permission.can() %}
     <div id="edit" class="tab-pane fade{% if edit %} in active{% endif %}">
         <form class="form-horizontal" method="POST" action="">
             <div class="control-group">

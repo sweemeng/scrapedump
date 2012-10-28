@@ -9,7 +9,7 @@
     <li {% if not edit %}class="active"{% endif %}><a href="#detail" data-toggle="tabs">Detail</a></li>
     <li><a href="#files" data-toggle="tabs">Files</a></li>
     <li><a href="#api" data-toggle="tabs">API</a></li>
-    {% if current_user.is_authenticated() %}
+    {% if permission.can() %}
     <li {% if edit %} class="active" {% endif %}><a href="#edit" data-toggle="tabs">Edit</a></li>
     {% endif %}
 </ul>
@@ -42,7 +42,9 @@
     <div id="files" class="tab-pane fade">
         <div class="page-header"><h3>Files</h3></div>
         <div id="upload_control">
+            {% if permission.can() %}
             <input id="fileupload" type="file" name="files[]" data-url="/upload/{{ project.project.id }}/{{ entry_id }}/" multiple>
+            {% endif %}
         </div>
         <div id="uploaded">
             <table class="table">
@@ -63,7 +65,9 @@
                             <td>{{project.get_datafile_metadata(entry_id,key)['size']}}</td>
                             <td>
                                     <a class="btn btn-primary" href="{{project.get_datafile_metadata(entry_id,key)['download']}}">download</a>
+                                    {% if permission.can() %}
                                     <a class="btn btn-danger" href="{{project.get_datafile_metadata(entry_id,key)['delete']}}">delete</a>
+                                    {% endif %}
                             </td>
                         <tr>
                {% endfor %}
@@ -88,7 +92,7 @@
                 </div>
             </p>
         </section>
-        {% if current_user.is_authenticated() %}
+        {% if permission.can() %}
         <section>
             <h5>Post</h5>
             <p>
@@ -196,6 +200,7 @@
         });
         $('#upload_dialog').modal({show:false});
         // add option
+        {% if permission.can() %}
         $("#fileupload").fileupload({
             dataType:'json',
             add:  function(e,data){
@@ -244,6 +249,7 @@
             }
             
         });
+        {% endif %}
         // don't bother with UI now, we just add a upload button
     });
 </script>
