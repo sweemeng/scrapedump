@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 {% block title %}Entry {% endblock %}
 {% block extra_header %}
-<style rel="stylesheet">
-</style>
+<link href="/static/css/slick.grid.css" rel="stylesheet">
 {% endblock %}
 {% block container %}
 <ul class="nav nav-tabs" id="entry_tabs">
     <li {% if not edit %}class="active"{% endif %}><a href="#detail" data-toggle="tabs">Detail</a></li>
-    <li><a href="#files" data-toggle="tabs">Files</a></li>
+    <li><a href="#browse" data-toggle="tabs">Browse</a></li>
+    <li><a href="#files" data-toggle="tabs">File</a></li>
     <li><a href="#api" data-toggle="tabs">API</a></li>
     {% if permission.can() %}
     <li {% if edit %} class="active" {% endif %}><a href="#edit" data-toggle="tabs">Edit</a></li>
@@ -38,6 +38,10 @@
                 <dd>{{ project.get_entry(entry_id)['count'] }}</dd>
             </dl>
         </div>
+    </div>
+    <div id="browse" class="tab-pane fade">
+       <div id="error"></div>
+       <div id="mygrid" style="width:800px;height:500px;"></div> 
     </div>
     <div id="files" class="tab-pane fade">
         <div class="page-header"><h3>Files</h3></div>
@@ -154,11 +158,16 @@
 <script src="/static/js/vendor/jquery.ui.widget.js"></script>
 <script src="/static/js/jquery.iframe-transport.js"></script>
 <script src="/static/js/jquery.fileupload.js"></script>
+<script src="/static/js/jquery.event.drag.js"></script>
 <script src="/static/js/mustache.js"></script>
 <script src="/static/js/bootstrap-modal.js"></script>
 <script src="/static/js/bootstrap-tab.js"></script>
 <script src="/static/js/bootstrap-scrollspy.js"></script>
-
+<script src="/static/js/slick.core.js"></script>
+<script src="/static/js/plugins/slick.cellrangedecorator.js"></script>
+<script src="/static/js/plugins/slick.cellrangeselector.js"></script>
+<script src="/static/js/plugins/slick.cellselectionmodel.js"></script>
+<script src="/static/js/slick.grid.js"></script>
 {% raw %}
 <script id="uploadedTpl" type="text/template">
 <tr id="{{name}}">
@@ -190,6 +199,7 @@
 {% endraw %}
 
 <script>
+    var grid;
     $(function(){
         $('#entry_tabs a').click(function(e){
             e.preventDefault();
@@ -199,6 +209,48 @@
             e.preventDefault();
         });
         $('#upload_dialog').modal({show:false});
+        var grid_option = {
+            enableCellNavigation: true,
+            forceFitColumns: true,
+            enableColumnReorder: false
+        }
+        $.getJSON('/api/db/{{ project.project.id }}/{{ entry_id }}/',function(data){
+            var keys = data[0];
+            var column = [];
+            var error = false;
+            for(key in keys){
+               if(key !== '_id'){
+                    var key_check = Object.prototype.toString.call(keys[key]);
+                    if(key_check === '[object Array]'|| key_check === '[object Object]'){
+                       console.log(key);
+                       error = true;
+                       break;
+                    }
+                    else{
+                        column.push({id:key,name:key,field:key});
+                    }
+                }
+            }
+            if(error === false){
+                var processed = [];
+                for(d in data){
+                    var temp = {}
+                    for(key in data[d]){
+                        if(key !== '_id'){
+                           temp[key] = data[d][key];
+                        }
+                    }
+                    processed.push(temp);
+                }
+                grid = new Slick.Grid('#mygrid',processed,column,grid_option);
+                grid.setSelectionModel(new Slick.CellSelectionModel());
+            }
+            else{
+                $('#error').addClass("alert");
+                $('#error').addClass("alert-error");
+                $('#error').text("This dataset have embedded document in it, we cannot display this on table");
+            }
+        });
         // add option
         {% if permission.can() %}
         $("#fileupload").fileupload({
