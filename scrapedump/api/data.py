@@ -49,6 +49,7 @@ class DataApi(MethodView):
         model = project.get_entry_collection(entry)
 
         model.insert(request.json)
+        project.entry_updated() 
         return jsonify({'status':True})
 
     def put(self,project_id,entry,entry_id):
@@ -66,7 +67,7 @@ class DataApi(MethodView):
         model = project.get_entry_collection(entry)
 
         model.update({'_id':id},request.json)
-        
+        project.entry_updated() 
         return jsonify({'status':True})
 
     def delete(self,project_id,entry,entry_id):
@@ -83,7 +84,7 @@ class DataApi(MethodView):
         project.get(project_id)
         model = project.get_entry_collection(entry)
         model.delete({'_id':id})
-        
+        project.entry_updated() 
         return jsonify({'status':True})
 
 

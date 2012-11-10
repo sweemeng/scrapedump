@@ -10,6 +10,8 @@ from flask import abort
 from flask.ext.login import login_required
 from flask.ext.login import current_user
 from flask.ext.wtf import TextField
+from socketio import socketio_manage
+from socketio.namespace import BaseNamespace
 
 from user.model import User
 from user.permission import EditProjectPermission
@@ -20,9 +22,12 @@ from forms.project import ProjectUpdateForm
 from project.model import Project
 from project.model import ProjectList
 from backend.data_loader import loader_task
+from backend.data_exporter import export_single
 from forms.entry import EntryForm
 from forms.entry import EntryUpdateForm
+from frontend.notifications import NotifierMixin
 import json
+import datetime
 
 
 frontend = Blueprint('frontend',__name__,
@@ -261,8 +266,8 @@ def add_entry(project_id):
 def download_export(project_id,entry_id,export_type):
     project = Project()
     project.get(project_id)
-    metadata = project.get_exported_file(entry_id)
-    file_ = project.get_datafile(str(metadata[export_type]))
+    metadata = project.get_exported_file(entry_id,export_type)
+    file_ = project.get_datafile(str(metadata['file_id']))
     response = make_response(file_.read())
     response.headers['Content-Description'] = 'Uploaded File'
     response.headers['Content-Type'] = 'application/%s' % file_.content_type
@@ -270,3 +275,7 @@ def download_export(project_id,entry_id,export_type):
     response.headers['Content-Disposition'] = 'attachment; filename=%s' % file_.filename
     return response 
 
+@frontend.route('/socket.io/<path:remaining>')
+def request_export(remaining):
+    socketio_manage(request.environ,{'/generate':NotifierMixin},request)
+    return 'done' 

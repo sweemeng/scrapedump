@@ -13,7 +13,7 @@ class Exporter(object):
         self.project = project
         self.fs = self.project.get_fs()
     
-    def export(self,model):
+    def export(self,entry_id):
         raise NotImplemented
 
     def is_writable(self,entry_id):

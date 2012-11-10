@@ -18,6 +18,7 @@ from flask.ext.principal import RoleNeed
 from flask.ext.principal import AnonymousIdentity
 from forms.login import LoginForm
 from flask import flash
+from socketio.server import SocketIOServer
 
 from api.data import DataApi
 from project.api import ProjectApi
@@ -28,12 +29,14 @@ from user.permission import user_permission
 from user.permission import edit_project_need
 from user.permission import EditProjectPermission
 from frontend.action import frontend
+from gevent import monkey
 
+monkey.patch_all()
 
 app = Flask(__name__)
 
 app.config['SECRET_KEY'] = '1234567'
-
+app.debug = True
 login_manager = LoginManager()
 
 login_manager.setup_app(app)
@@ -117,4 +120,5 @@ def run():
 
 if __name__ == '__main__':
     print "BOOM"
-    run()
+    #run()
+    SocketIOServer(('',5000),app, resource="socket.io").serve_forever()

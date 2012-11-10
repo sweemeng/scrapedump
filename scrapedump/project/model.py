@@ -5,7 +5,7 @@ import copy
 import uuid
 from utils import file_handler
 from celery.result import AsyncResult
-
+import datetime
     
 # TODO: Find out why does a new field not added into the models
 class Project(object):
@@ -223,6 +223,7 @@ class Project(object):
         for data in handler.run():
             entry_.insert(data)
         datasource['loaded'] = True
+        self.entry_updated()
     
     def delete_datafile(self,entry_id,file_id):
         db = self.get_db()
@@ -256,13 +257,47 @@ class Project(object):
     def link_exported_file(self,entry_id,format_,file_id):
         if entry_id not in self.project.export:
             self.project.export[entry_id] = {}
-        self.project.export[entry_id][format_]=file_id
+        self.project.export[entry_id][format_]={'file_id':file_id,'task_id':''}
         print 'saving result'
         self.save()
+   
+    def set_exporter_task(self,entry_id,format_,task_id):
+        if not entry_id in self.project.export:
+            self.project.export[entry_id] = {}
+        if not format_ in self.project.export[entry_id]:
+            self.project.export[entry_id][format_] = {'file_id':'','task_id':''}
+        self.project.export[entry_id][format_]['task_id'] = task_id
+        self.save()
     
-    def get_exported_file(self,entry_id):
+    def export_completed(self,entry_id,format_):
+        if not self.project.export[entry_id]:
+            return False
+        
+        print self.project.export
+        task_id = self.project.export[entry_id][format_]['task_id']
+        file_id = self.project.export[entry_id][format_]['file_id']
+        if not task_id:
+            if not file_id:
+                return False
+            return True
+        task = AsyncResult(task_id)
+        if not task.ready():
+            return False
+        return True
+         
+    def get_exported_file(self,entry_id,format_):
+        return self.project.export[entry_id][format_]
+    
+    def get_exported_files(self,entry_id):
         return self.project.export[entry_id]
     
+    def entry_updated(self):
+        self.project.entry_updated = datetime.datetime.utcnow()
+        print self.project.entry_updated
+        self.save()
+    
+    def get_entry_updated(self):
+        return self.project.entry_updated
 
 class ProjectList(object):
     def __init__(self):
@@ -305,6 +340,9 @@ class ProjectTemplate(object):
         # we will need entries detail
         self.entries = []
         self.entry = {}
+        self.created_at = None
+        self.updated_at = None
+        self.entry_updated = None
         self.entry_template = {
             'name':'',
             'description':'',
@@ -314,6 +352,7 @@ class ProjectTemplate(object):
         }
         self.task_id = ''
         self.export = {}
+        
         # {'entry_id':{'format':'file_id'}}
         self.output_file = []
         self.old_count = []
@@ -354,6 +393,9 @@ class ProjectTemplate(object):
         data['stats'] = self.stats
         data['entry'] = self.entry
         data['export'] = self.export
+        data['created_at'] = self.created_at
+        data['updated_at'] = self.updated_at
+        data['entry_updated'] = self.entry_updated
         return data
     
     def from_mongo(self,data):

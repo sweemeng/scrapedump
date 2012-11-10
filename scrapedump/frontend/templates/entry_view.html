@@ -25,10 +25,9 @@
                     Export to...
                     <span class="caret"></span>
                 </a>
-                <ul class="dropdown-menu">
-                    {% for key in project.get_exported_file(entry_id) %}
-                        <li><a href="/export/{{project.project.id}}/{{entry_id}}/{{key}}/">{{key}}</a></li>
-                    {% endfor %}
+                <ul class="dropdown-menu" role="menu" aria-labelledby="dlabel">
+                    <li><a href="#" class="export_file" data-format="csv">CSV</a></li>
+                    <li><a href="#" class="export_file" data-format="json">JSON</a></li>
                 </ul>
             </div>
         </div>
@@ -38,6 +37,7 @@
                 <dd>{{ project.get_entry(entry_id)['count'] }}</dd>
             </dl>
         </div>
+        <div><br/><br/><br/></div>
     </div>
     <div id="browse" class="tab-pane fade">
        <div id="error"></div>
@@ -168,6 +168,8 @@
 <script src="/static/js/plugins/slick.cellrangeselector.js"></script>
 <script src="/static/js/plugins/slick.cellselectionmodel.js"></script>
 <script src="/static/js/slick.grid.js"></script>
+<script src="/static/js/socket.io/socket.io.min.js"></script>
+<script src="/static/js/socket.io/socket.io.min.js"></script>
 {% raw %}
 <script id="uploadedTpl" type="text/template">
 <tr id="{{name}}">
@@ -196,11 +198,38 @@
     </td>
 
 </script>
+
+<script id="downloadIFrame" type="text/template">
+    <div id="export_download" style="display:none">
+    <iframe src="/export/{{project_id}}/{{entry_id}}/{{format}}/" ></iframe>
+    </div>
+</script>
 {% endraw %}
 
 <script>
     var grid;
+    var socket = io.connect('/generate');
     $(function(){
+        socket.on('progress',function(data){
+            console.log(data);
+            if(data.completed == true){
+                
+                var template = $('#downloadIFrame').html();    
+                var html = Mustache.to_html(template,data);
+                $('body').append(html);
+            }
+        }); 
+        $('.export_file').click(function(event){
+            event.preventDefault();
+            var file_format = $(this).data('format');
+            var data = {
+                'project_id':'{{ project.project.id }}',
+                'entry_id':'{{ entry_id }}',
+                'format':file_format
+            };
+            socket.emit('request file',data);
+            console.log('emitted')    
+        });
         $('#entry_tabs a').click(function(e){
             e.preventDefault();
             $(this).tab('show');

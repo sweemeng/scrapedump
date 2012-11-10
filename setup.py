@@ -23,5 +23,7 @@ setup(
         'nose',
         'py-bcrypt',
         'celery',
+        'gevent',
+        'gevent-socketio'
         ],
 )
