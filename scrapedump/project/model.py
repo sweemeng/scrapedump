@@ -272,6 +272,8 @@ class Project(object):
     def export_completed(self,entry_id,format_):
         if not self.project.export[entry_id]:
             return False
+        if not format_ in self.project.export[entry_id]:
+            return False
         
         print self.project.export
         task_id = self.project.export[entry_id][format_]['task_id']

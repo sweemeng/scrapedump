@@ -45,6 +45,7 @@
     </div>
     <div id="files" class="tab-pane fade">
         <div class="page-header"><h3>Files</h3></div>
+        <div id="file_error"></div>
         <div id="upload_control">
             {% if permission.can() %}
             <input id="fileupload" type="file" name="files[]" data-url="/upload/{{ project.project.id }}/{{ entry_id }}/" multiple>
@@ -70,7 +71,7 @@
                             <td>
                                     <a class="btn btn-primary" href="{{project.get_datafile_metadata(entry_id,key)['download']}}">download</a>
                                     {% if permission.can() %}
-                                    <a class="btn btn-danger" href="{{project.get_datafile_metadata(entry_id,key)['delete']}}">delete</a>
+                                    <a class="btn btn-danger" class="delete_file" data-divid="{{project.get_datafile_metadata(entry_id,key)['name']}}" data-delete="{{project.get_datafile_metadata(entry_id,key)['delete']}}">delete</a>
                                     {% endif %}
                             </td>
                         <tr>
@@ -219,6 +220,22 @@
                 $('body').append(html);
             }
         }); 
+        $('.delete_file').click(function(event){
+            event.preventDefault();
+            var divid = $(this).data('divid');
+            var url = $(this).data('delete');
+            $.getJSON(url,function(data){
+                if(data.status == 'Success'){
+                    $('#'+divid).remove();
+                }
+                else{
+                    $('#file_error').addClass('alert');
+                    $('#file_error').addClass('alert-error');
+                    $('#file_error').text(data.message);
+                }
+
+            });
+        });
         $('.export_file').click(function(event){
             event.preventDefault();
             var file_format = $(this).data('format');
